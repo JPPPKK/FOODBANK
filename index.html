@@ -886,21 +886,17 @@ function renderPelajar(){
   kemasCart();
 }
 
-function kiraItemKategori(kategori, kuantiti){
-  // 2 paket Maggi = 1 item dikira, 2 sachet 3 In 1 = 1 item dikira (sama seperti Code.gs)
-  const qty = Math.max(0, Math.floor(Number(kuantiti) || 0));
-  const kat = String(kategori || '').trim().toLowerCase();
-  if (kat === 'maggi (paket)' || kat === '3 in 1') return Math.ceil(qty / 2);
-  return qty;
-}
+// Setiap barang ada "dikira": berapa unit dikira sebagai 1 item (cth: 2 paket Maggi / Lexus = 1 item).
+// Pecahan dalam kategori yang sama digabung dahulu, kemudian dibundarkan ke atas (sama seperti Code.gs).
+function dikiraBarang(i){ const n = Math.floor(Number(i && i.dikira)); return n >= 1 ? n : 1; }
 function hadKat(c){ const K = S.d.had; return K.had[c] || K.had['Lain-lain'] || { had:null, ket:'' }; }
 function kiraanKat(pick, stok){
   const mentah = {}, kiraan = {};
   Object.keys(pick).forEach(id => {
     const i = (stok || S.d.stok).find(x => String(x.id) === String(id));
-    if (i) mentah[i.kategori] = (mentah[i.kategori] || 0) + (Number(pick[id]) || 0);
+    if (i) mentah[i.kategori] = (mentah[i.kategori] || 0) + (Number(pick[id]) || 0) / dikiraBarang(i);
   });
-  Object.keys(mentah).forEach(kat => { kiraan[kat] = kiraItemKategori(kat, mentah[kat]); });
+  Object.keys(mentah).forEach(kat => { kiraan[kat] = Math.ceil(mentah[kat] - 1e-9); });
   return kiraan;
 }
 function jumlahPick(p){ return Object.values(kiraanKat(p, S.d.stok)).reduce((s, n) => s + n, 0); }
@@ -926,7 +922,7 @@ function pickerHtml(stok, pick, had){
       (h.had != null ? '<span class="cat-c'+(n >= h.had ? ' full' : '')+'">'+n+' / '+h.had+'</span>' : '')+'</div>' +
     ikut[c].map(i => {
       const n = pick[i.id] || 0;
-      return '<div class="pick'+(n ? ' on' : '')+'"><div><div class="pick-name">'+esc(i.nama)+'</div><div class="pick-left">Tinggal '+i.stok+' '+esc(i.unit)+'</div></div>'+
+      return '<div class="pick'+(n ? ' on' : '')+'"><div><div class="pick-name">'+esc(i.nama)+'</div><div class="pick-left">Tinggal '+i.stok+' '+esc(i.unit)+(dikiraBarang(i) > 1 ? ' · <b>'+dikiraBarang(i)+' '+esc(i.unit)+' = 1 item</b>' : '')+'</div></div>'+
         '<div class="step"><button type="button" data-step="-1" data-id="'+esc(i.id)+'" aria-label="Kurang '+esc(i.nama)+'" '+(n ? '' : 'disabled')+'>−</button><output>'+n+'</output>'+
         '<button type="button" data-step="1" data-id="'+esc(i.id)+'" aria-label="Tambah '+esc(i.nama)+'" '+(bolehTambah(pick, stok, i, had) ? '' : 'disabled')+'>+</button></div></div>';
     }).join('');
@@ -1209,6 +1205,7 @@ function bukaItem(i){
     '<div class="field"><label for="iM">Stok minimum</label><input id="iM" type="number" min="0" step="1" inputmode="numeric" value="'+(i.min != null ? i.min : '')+'" placeholder="Contoh: 20"></div>'+
     '<div class="field"><label for="iL">Lokasi</label><input id="iL" maxlength="40" value="'+esc(i.lokasi || '')+'" placeholder="Rak A, Peti sejuk"></div>'+
     '<div class="field"><label for="iX">Tarikh luput terdekat</label><input id="iX" type="date" value="'+esc(i.luput || '')+'"></div>'+
+    '<div class="field"><label for="iD">Unit dikira 1 item</label><input id="iD" type="number" min="1" max="20" step="1" inputmode="numeric" value="'+(i.dikiraSendiri ? i.dikira : '')+'" placeholder="'+(i.dikira ? 'Asal: '+i.dikira : 'Asal: 1')+'"><span class="hint">Cth: 2 = dua paket dikira satu item. Kosongkan untuk nilai asal.</span></div>'+
     (baru ? '<div class="field"><label for="iS">Stok awal (pilihan)</label><input id="iS" type="number" min="0" step="1" inputmode="numeric" placeholder="Kosongkan jika belum dikira"></div>' : '')+
     '</div><div class="err" id="iE"></div></div>'+
     '<div class="dlg-foot">'+(baru ? '' : '<button type="button" class="btn danger" id="iDel">Padam item</button>')+'<div class="right"><button type="button" class="btn" data-close>Batal</button><button class="btn primary" type="submit" id="iGo">'+(baru ? 'Tambah' : 'Simpan')+'</button></div></div></form>');
@@ -1217,7 +1214,7 @@ function bukaItem(i){
     aksiStaf('padamItem', [i.id], del, $('#iE'), i.nama+' dipadam'); }; }
   $('#fIt').addEventListener('submit', ev => { ev.preventDefault();
     const nama = $('#iN').value.trim(); if (!nama) { $('#iE').textContent = 'Nama item diperlukan.'; return; }
-    aksiStaf('simpanItem', [{ id: i.id || null, nama, kategori: $('#iK').value, unit: $('#iU').value.trim() || 'unit', min: $('#iM').value, lokasi: $('#iL').value.trim(), luput: $('#iX').value, stokAwal: baru ? $('#iS').value : undefined }],
+    aksiStaf('simpanItem', [{ id: i.id || null, nama, kategori: $('#iK').value, unit: $('#iU').value.trim() || 'unit', min: $('#iM').value, lokasi: $('#iL').value.trim(), luput: $('#iX').value, dikira: $('#iD').value.trim(), stokAwal: baru ? $('#iS').value : undefined }],
       $('#iGo'), $('#iE'), baru ? nama+' ditambah' : nama+' dikemas kini');
   });
 }
