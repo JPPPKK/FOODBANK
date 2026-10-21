@@ -268,6 +268,16 @@ button.tile:hover{border-color:var(--muted)}
 #vizTip b{display:block;font-size:15px}
 #vizTip span{color:var(--muted)}
 .lap-muat{opacity:.55;transition:opacity .2s}
+/* batch & FEFO */
+.bt-row{display:grid;grid-template-columns:minmax(0,1fr) 120px 150px auto;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+.bt-row .bt-q{font-family:var(--display);font-weight:700;font-size:22px;text-align:right;line-height:1}
+.bt-row .bt-q small{display:block;font-family:var(--body);font-size:12px;font-weight:500;color:var(--muted)}
+.bt-acts{display:flex;gap:6px;justify-content:flex-end}
+.st-fefo{background:var(--navy);color:var(--on-navy)}
+.bt-list{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:8px}
+.bt-list li{display:flex;justify-content:space-between;gap:10px;padding:8px 12px;border-top:1px solid var(--line);font-size:14px;align-items:center}
+.bt-list li:first-child{border-top:0}
+.lama-row{display:grid;grid-template-columns:minmax(0,1fr) 90px 150px minmax(0,1fr);gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
 /* staf meal & suhu */
 .meal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .meter{height:10px;border-radius:5px;background:color-mix(in srgb,var(--c1) 18%,var(--surface));overflow:hidden;min-width:160px;flex:1;max-width:320px}
@@ -459,6 +469,11 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
   .trow.staf.pemilik > :nth-child(4){display:none}
   .vgrid{grid-template-columns:1fr}
   .suhu-in{grid-template-columns:1fr 1fr}
+  .bt-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"m q" "l l" "a a"}
+  .bt-row > :nth-child(1){grid-area:m} .bt-row > :nth-child(2){grid-area:q} .bt-row > :nth-child(3){grid-area:l} .bt-row > :nth-child(4){grid-area:a}
+  .bt-acts{justify-content:flex-start}
+  .lama-row{grid-template-columns:minmax(0,1fr) 70px;grid-template-areas:"n q" "d d" "s s"}
+  .lama-row > :nth-child(1){grid-area:n} .lama-row > :nth-child(2){grid-area:q} .lama-row > :nth-child(3){grid-area:d} .lama-row > :nth-child(4){grid-area:s}
   .donut-wrap{grid-template-columns:110px minmax(0,1fr)}
   .hb{grid-template-columns:minmax(0,42%) minmax(0,1fr) 40px}
   .kp-row{grid-template-columns:minmax(0,1fr) 64px;grid-template-areas:"n b" "s b" "i i"}
@@ -1195,7 +1210,7 @@ function renderProfil(){
 }
 
 /* ---------------- STAF ---------------- */
-const TABS = [['ringkasan','Ringkasan'],['laporan','Laporan'],['stok','Stok'],['kiraan','Kiraan stok'],['ambilan','Ambilan'],['pelajar','Pelajar'],['suhu','Suhu'],['stafmeal','Staf meal'],['log','Log stok'],['tetapan','Tetapan']];
+const TABS = [['ringkasan','Ringkasan'],['laporan','Laporan'],['stok','Stok'],['batch','Batch & luput'],['kiraan','Kiraan stok'],['ambilan','Ambilan'],['pelajar','Pelajar'],['suhu','Suhu'],['stafmeal','Staf meal'],['log','Log stok'],['tetapan','Tetapan']];
 function statusItem(i){ if (i.stok == null) return 'baru'; if (i.stok <= 0) return 'habis'; if (i.stok <= i.min) return 'rendah'; return 'cukup'; }
 const ST_LABEL = { cukup:'Cukup', rendah:'Rendah', habis:'Habis', baru:'Belum dikira' };
 function luputHampir(i){ if (!i.luput || !(i.stok > 0)) return false; return bezaHari(i.luput) <= 30; }
@@ -1211,6 +1226,7 @@ function renderStaf(){
   else if (S.tab === 'pelajar') body = stafPelajar(u);
   else if (S.tab === 'tetapan') body = stafTetapan();
   else if (S.tab === 'kiraan') body = stafKiraan(u);
+  else if (S.tab === 'batch') body = stafBatch(u);
   else if (S.tab === 'laporan') body = stafLaporan(u);
   else if (S.tab === 'suhu') body = stafSuhu(u);
   else if (S.tab === 'stafmeal') body = stafMeal(u);
@@ -1269,7 +1285,7 @@ function stafStok(){
     '<section class="panel"><div class="panel-head"><span><strong style="color:var(--ink)">'+list.length+'</strong> daripada '+S.d.stok.length+' item</span><span>Jumlah unit: <strong style="color:var(--ink)">'+unit+'</strong></span></div><ul class="list">'+
     (list.length ? list.map(i => {
       const st = statusItem(i);
-      const meta = [esc(i.kategori), i.lokasi ? '<span class="shelf">'+esc(i.lokasi)+'</span>' : '', i.kotak ? '<span><b>Rak '+Math.max(0, (i.stok || 0) - i.kotak)+' · Kotak '+i.kotak+'</b></span>' : '', infoLuput(i)].filter(Boolean).map(x => x.startsWith('<') ? x : '<span>'+x+'</span>').join('');
+      const meta = [esc(i.kategori), i.lokasi ? '<span class="shelf">'+esc(i.lokasi)+'</span>' : '', i.kotak ? '<span><b>Rak '+Math.max(0, (i.stok || 0) - i.kotak)+' · Kotak '+i.kotak+'</b></span>' : '', infoLuput(i), hintFefo(i)].filter(Boolean).map(x => x.startsWith('<') ? x : '<span>'+x+'</span>').join('');
       return '<li class="item"><div class="row-main"><div class="row-t">'+esc(i.nama)+'</div><div class="row-m">'+meta+'</div></div>'+
         '<div class="qty" style="text-align:right">'+(i.stok == null ? '–' : i.stok)+'<br><small>'+esc(i.unit)+' · min '+i.min+'</small>'+'</div>'+
         '<span class="pill st-'+st+'">'+ST_LABEL[st]+'</span>'+
@@ -1435,6 +1451,110 @@ function bukaLaporan(L, baru){
     (beza.length ? blok : '<div class="banner ok">Semua item yang dikira sama dengan sistem.</div>')+
     (baru ? '<div class="hint">Stok sistem sudah dikemas kini mengikut kiraan. Sekarang anda boleh restock dan rekod "+ Masuk" untuk barang baharu.</div>' : '')+
     '</div><div class="dlg-foot"><div class="right"><button type="button" class="btn primary" data-close>Selesai</button></div></div>');
+}
+
+/* ---------- BATCH & FEFO ---------- */
+function senaraiSumber(){
+  const set = new Set(['Sumbangan alumni', 'Sumbangan pensyarah', 'Belian koperasi', 'Sumbangan NGO', 'Program JPP']);
+  (S.d.stok || []).forEach(i => (i.batch || []).forEach(b => { if (b.sumber) set.add(b.sumber); }));
+  return [...set];
+}
+function hintFefo(i){
+  const b = (i.batch || []);
+  if (!b.length) return '';
+  if (i.stokLama > 0) return '<span>'+b.length+' batch · keluarkan dahulu: stok lama ('+i.stokLama+')</span>';
+  return '<span>'+b.length+' batch · keluarkan dahulu: luput '+esc(b[0].luput ? tarikhPendek(b[0].luput) : '–')+' ('+b[0].baki+')</span>';
+}
+function statusLuput(k){
+  if (!k) return { cls:'st-baru', t:'Tiada tarikh', n: 9999 };
+  const n = bezaHari(k);
+  if (n < 0) return { cls:'st-habis', t:'× Luput '+Math.abs(n)+' hari lalu', n };
+  if (n === 0) return { cls:'st-habis', t:'! Luput hari ini', n };
+  if (n <= 7) return { cls:'st-rendah', t:'! '+n+' hari lagi', n };
+  if (n <= 30) return { cls:'st-rendah', t:n+' hari lagi', n };
+  return { cls:'st-cukup', t:n+' hari lagi', n };
+}
+function stafBatch(u){
+  if (!S.bt) S.bt = { tapis:'aktif', q:'' };
+  const T = S.bt, q = T.q.toLowerCase();
+  const semua = [];
+  S.d.stok.forEach(i => (i.batch || []).forEach((b, k) => semua.push(Object.assign({ item: i, pertama: k === 0 && !(i.stokLama > 0) }, b))));
+  semua.sort((a, b) => (a.luput || '9999') < (b.luput || '9999') ? -1 : (a.luput || '9999') > (b.luput || '9999') ? 1 : 0);
+  const kira = { luput: 0, d7: 0, d30: 0, tiada: 0 };
+  semua.forEach(b => { const s2 = statusLuput(b.luput); if (!b.luput) kira.tiada++; else if (s2.n < 0) kira.luput++; else if (s2.n <= 7) kira.d7++; else if (s2.n <= 30) kira.d30++; });
+  const list = semua.filter(b => {
+    if (q && (b.item.nama + ' ' + (b.sumber || '') + ' ' + b.id).toLowerCase().indexOf(q) < 0) return false;
+    const n = statusLuput(b.luput).n;
+    if (T.tapis === 'luput') return b.luput && n < 0;
+    if (T.tapis === 'd7') return b.luput && n >= 0 && n <= 7;
+    if (T.tapis === 'd30') return b.luput && n >= 0 && n <= 30;
+    if (T.tapis === 'tiada') return !b.luput;
+    return true;
+  });
+  const lama = S.d.stok.filter(i => i.stokLama > 0);
+  const unitLama = lama.reduce((s, i) => s + i.stokLama, 0);
+  const tiles = '<section class="tiles">'+
+    '<button class="tile crit" data-bt="tapis" data-v="luput"><span class="n">'+kira.luput+'</span><span class="l">Batch sudah luput</span></button>'+
+    '<button class="tile warn" data-bt="tapis" data-v="d7"><span class="n">'+kira.d7+'</span><span class="l">Luput dalam 7 hari</span></button>'+
+    '<button class="tile warn" data-bt="tapis" data-v="d30"><span class="n">'+(kira.d7 + kira.d30)+'</span><span class="l">Luput dalam 30 hari</span></button>'+
+    '<button class="tile" data-bt="tapis" data-v="aktif"><span class="n">'+semua.length+'</span><span class="l">Batch aktif</span></button></section>';
+  const notis = (lama.length ? '<div class="banner banner-row"><span><b>'+lama.length+' item ('+unitLama+' unit)</b> masih stok lama tanpa tarikh luput. Stok lama dikeluarkan dahulu. Rekod tarikh luputnya supaya FEFO lebih tepat.</span><button class="btn" data-bt="lama">Rekod tarikh luput</button></div>' : '')+
+    (kira.luput ? '<div class="banner" style="background:var(--crit-bg);color:var(--crit)"><b>'+kira.luput+' batch sudah luput.</b> Keluarkan dari rak/chiller dan tekan "Buang" supaya stok sistem tepat.</div>' : '');
+  const bar = '<div class="bar"><div class="field" style="flex:1;min-width:200px"><label for="btQ">Cari</label><input id="btQ" type="search" value="'+esc(T.q)+'" placeholder="Nama item, sumber atau ID batch"></div>'+
+    '<div class="chips">'+[['aktif','Semua'],['luput','Sudah luput'],['d7','≤ 7 hari'],['d30','≤ 30 hari'],['tiada','Tiada tarikh']].map(c => '<button class="chip" data-bt="tapis" data-v="'+c[0]+'" aria-pressed="'+(T.tapis === c[0])+'">'+c[1]+'</button>').join('')+'</div></div>';
+  const rows = list.map(b => { const st = statusLuput(b.luput);
+    return '<li class="bt-row"><div class="row-main"><div class="row-t">'+esc(b.item.nama)+(b.pertama ? ' <span class="pill st-fefo">Keluarkan dahulu</span>' : '')+'</div>'+
+      '<div class="row-m"><span>'+esc(b.item.kategori)+'</span>'+(b.sumber ? '<span>'+esc(b.sumber)+'</span>' : '')+'<span>Masuk '+esc(b.masuk ? masa(b.masuk) : '–')+'</span><span class="mono-s">'+esc(b.id)+'</span></div></div>'+
+      '<div class="bt-q">'+b.baki+'<small>daripada '+b.asal+' '+esc(b.item.unit)+'</small></div>'+
+      '<div><div style="font-weight:600;font-size:14px">'+(b.luput ? esc(tarikhPendek(b.luput)) : '–')+'</div><span class="pill '+st.cls+'">'+st.t+'</span></div>'+
+      '<div class="bt-acts"><button class="btn" data-bt="edit" data-id="'+esc(b.id)+'">Edit</button><button class="btn out" data-bt="buang" data-id="'+esc(b.id)+'">Buang</button></div></li>'; }).join('');
+  return tiles + notis + bar + '<section class="panel"><div class="panel-head"><span>'+list.length+' batch · disusun ikut tarikh luput (FEFO)</span><span>Ambilan pelajar ditolak automatik dari batch paling awal luput</span></div><ul class="list">'+
+    (rows || '<li class="empty"><strong>Tiada batch sepadan</strong>Batch dicipta setiap kali stok masuk direkod dalam tab Stok.</li>')+'</ul></section>';
+}
+function cariBatch(id){
+  for (const i of S.d.stok) { const b = (i.batch || []).find(x => x.id === id); if (b) return { b, i }; }
+  return null;
+}
+async function aksiBatch(el){
+  const k = el.dataset.bt;
+  if (k === 'tapis') { S.bt = S.bt || { tapis:'aktif', q:'' }; S.bt.tapis = el.dataset.v; if (S.tab !== 'batch') S.tab = 'batch'; render(); return; }
+  if (k === 'lama') return bukaStokLama();
+  const x = cariBatch(el.dataset.id); if (!x) return;
+  const { b, i } = x;
+  if (k === 'buang') {
+    const st = statusLuput(b.luput);
+    bukaDlg('<form id="fBb" novalidate><div class="dlg-head"><h2>Buang dari batch</h2><p>'+esc(i.nama)+' · luput '+esc(b.luput ? tarikhPendek(b.luput) : 'tiada tarikh')+' · baki '+b.baki+' '+esc(i.unit)+'</p></div><div class="dlg-body">'+
+      '<div class="field"><label for="bbQ">Kuantiti dibuang ('+esc(i.unit)+')</label><input id="bbQ" type="number" min="1" max="'+b.baki+'" step="1" inputmode="numeric" value="'+b.baki+'"></div>'+
+      '<div class="field"><label for="bbC">Sebab</label><input id="bbC" maxlength="140" value="'+(st.n < 0 ? 'Luput' : 'Rosak')+'"></div>'+
+      '<div class="hint">Stok sistem akan ditolak dan direkod sebagai "Keluar" dalam Log stok.</div><div class="err" id="bbE"></div></div>'+
+      '<div class="dlg-foot"><div class="right"><button type="button" class="btn" data-close>Batal</button><button class="btn danger" id="bbGo" type="submit">Buang</button></div></div></form>');
+    $('#fBb').addEventListener('submit', ev => { ev.preventDefault();
+      const q = parseInt($('#bbQ').value, 10);
+      if (!(q >= 1 && q <= b.baki)) { $('#bbE').textContent = 'Kuantiti mesti antara 1 dan ' + b.baki + '.'; return; }
+      aksiStaf('buangBatch', [b.id, q, $('#bbC').value.trim()], $('#bbGo'), $('#bbE'), q + ' ' + i.unit + ' ' + i.nama + ' dibuang dari batch');
+    });
+    return;
+  }
+  if (k === 'edit') {
+    bukaDlg('<form id="fBe" novalidate><div class="dlg-head"><h2>Edit batch</h2><p>'+esc(i.nama)+' · '+esc(b.id)+'</p></div><div class="dlg-body">'+
+      '<div class="field"><label for="beL">Tarikh luput</label><input id="beL" type="date" value="'+esc(b.luput || '')+'"></div>'+
+      '<div class="field"><label for="beS">Sumber</label><input id="beS" maxlength="60" list="dlSumber2" value="'+esc(b.sumber || '')+'"><datalist id="dlSumber2">'+senaraiSumber().map(x => '<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
+      '<div class="err" id="beE"></div></div><div class="dlg-foot"><div class="right"><button type="button" class="btn" data-close>Batal</button><button class="btn primary" id="beGo" type="submit">Simpan</button></div></div></form>');
+    $('#fBe').addEventListener('submit', ev => { ev.preventDefault(); aksiStaf('kemasBatch', [b.id, { luput: $('#beL').value, sumber: $('#beS').value.trim() }], $('#beGo'), $('#beE'), 'Batch dikemas kini'); });
+  }
+}
+function bukaStokLama(){
+  const lama = S.d.stok.filter(i => i.stokLama > 0);
+  bukaDlg('<form id="fSl" novalidate><div class="dlg-head"><h2>Stok lama tanpa batch</h2><p>Isi tarikh luput yang tertera pada barang. Item yang dibiarkan kosong tidak diubah.</p></div><div class="dlg-body flush" style="padding:0 18px">'+
+    lama.map(i => '<div class="lama-row"><div><b>'+esc(i.nama)+'</b><div class="hint">'+esc(i.kategori)+'</div></div><div class="hint">'+i.stokLama+' '+esc(i.unit)+'</div>'+
+      '<input type="date" data-sl="'+esc(i.id)+'" aria-label="Tarikh luput '+esc(i.nama)+'" value="'+esc(i.luput || '')+'"><input data-sls="'+esc(i.id)+'" maxlength="60" list="dlSumber3" placeholder="Sumber (pilihan)" aria-label="Sumber '+esc(i.nama)+'"></div>').join('')+
+    '<datalist id="dlSumber3">'+senaraiSumber().map(x => '<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
+    '<div class="dlg-foot"><div class="err" id="slE"></div><div class="right"><button type="button" class="btn" data-close>Batal</button><button class="btn primary" id="slGo" type="submit">Simpan sebagai batch</button></div></div></form>');
+  $('#fSl').addEventListener('submit', ev => { ev.preventDefault();
+    const rows = Array.from(dlg.querySelectorAll('[data-sl]')).filter(x => x.value).map(x => ({ id: x.dataset.sl, luput: x.value, sumber: (dlg.querySelector('[data-sls="' + x.dataset.sl + '"]') || {}).value || '' }));
+    if (!rows.length) { $('#slE').textContent = 'Isi tarikh luput untuk sekurang-kurangnya satu item.'; return; }
+    aksiStaf('batchStokLama', [rows], $('#slGo'), $('#slE'), rows.length + ' item direkod sebagai batch');
+  });
 }
 
 /* ---------- STAF MEAL ---------- */
@@ -1741,9 +1861,21 @@ function stafLaporan(u){
   const sm = Object.keys(perStaf).map(n => ({ nama: n, n: perStaf[n] })).sort((a, b) => b.n - a.n);
   const k9 = kadViz('Staf meal mengikut item', 'Unit diambil oleh staf JPP', sm.length ? hbars(sm.slice(0, 8), 'var(--c1)', 'unit') : '<div class="vkosong">Tiada staf meal dalam tempoh ini.</div>', sm.length ? jadualHtml(['Item', 'Unit'], sm.map(r => [r.nama, r.n])) : '');
 
+  // 10. Unit akan luput (FEFO), 8 minggu akan datang
+  const mingguL = ['Sudah luput'].concat([0, 1, 2, 3, 4, 5, 6, 7].map(w => 'Mgg ' + (w + 1)));
+  const unitL = mingguL.map(() => 0); let tiadaL = 0;
+  S.d.stok.forEach(i => (i.batch || []).forEach(b => {
+    if (!b.luput) { tiadaL += b.baki; return; }
+    const n = bezaHari(b.luput);
+    if (n < 0) unitL[0] += b.baki; else if (n < 56) unitL[1 + Math.floor(n / 7)] += b.baki;
+  }));
+  const k10 = kadViz('Unit akan luput', 'Baki batch mengikut minggu tarikh luput (dari hari ini). Keluarkan dahulu mengikut FEFO.' + (tiadaL ? ' ' + tiadaL + ' unit tiada tarikh.' : ''),
+    unitL.some(Boolean) ? lajur(mingguL, [{ nama: 'Unit', nilai: unitL, warna: 'var(--c1)' }], { aria: 'Unit akan luput', tipLabel: i => i === 0 ? 'Sudah luput' : 'Minggu ' + i + ' (' + tarikhKecil(tambahHari(L.hariIni, (i - 1) * 7)) + ' – ' + tarikhKecil(tambahHari(L.hariIni, i * 7 - 1)) + ')' }) : '<div class="vkosong">Belum ada batch dengan tarikh luput.</div>',
+    unitL.some(Boolean) ? jadualHtml(['Tempoh', 'Unit'], mingguL.map((m, i) => [m, unitL[i]])) : '');
+
   return atas + '<div class="' + (T.muat ? 'lap-muat' : '') + '" style="display:flex;flex-direction:column;gap:12px">' +
     '<p class="hint" style="margin:0">' + esc(tarikhPendek(mula)) + ' hingga ' + esc(tarikhPendek(L.hariIni)) + '</p>' + tiles +
-    '<div class="vgrid">' + k1 + k2 + k3 + k4 + k5 + k6 + k7 + k8 + k9 + '</div></div>';
+    '<div class="vgrid">' + k1 + k2 + k3 + k4 + k5 + k10 + k6 + k7 + k8 + k9 + '</div></div>';
 }
 // Tooltip carta (teks sahaja, tidak pernah innerHTML)
 (function(){
@@ -1806,6 +1938,7 @@ $('#main').addEventListener('click', e => {
   const g = e.target.closest('[data-goto]'); if (g) { S.tab = g.dataset.goto; if (g.dataset.st) S.stok = {q:'',cat:'',st:g.dataset.st}; if (g.dataset.srcGoto) S.amb = {q:'', src:g.dataset.srcGoto}; render(); return; }
   const sah = e.target.closest('[data-sah]'); if (sah) { const a = S.d.urus.ambilan.find(x => x.id === sah.dataset.sah); if (a) bukaSahkanKiosk(a); return; }
   const kpa = e.target.closest('[data-kpa]'); if (kpa) { aksiKiraan(kpa); return; }
+  const bta = e.target.closest('[data-bt]'); if (bta) { aksiBatch(bta); return; }
   const lh = e.target.closest('[data-lhari]'); if (lh) { S.lap.hari = Number(lh.dataset.lhari); render(); return; }
   const lm = e.target.closest('[data-lmuat]'); if (lm) { muatLaporan(); return; }
   const sa = e.target.closest('[data-sa]'); if (sa) { aksiSuhu(sa); return; }
@@ -1828,7 +1961,7 @@ $('#main').addEventListener('input', e => {
   const id = e.target.id;
   if (id === 'kpNota') { S.kp.nota = e.target.value; simpanDraf(); return; }
   if (id === 'smNota') { S.meal.nota = e.target.value; return; }
-  if (id === 'sQ') S.stok.q = e.target.value; else if (id === 'aQ') S.amb.q = e.target.value; else if (id === 'pQ') S.pel.q = e.target.value; else if (id === 'kpQ') S.kp.q = e.target.value; else return;
+  if (id === 'sQ') S.stok.q = e.target.value; else if (id === 'aQ') S.amb.q = e.target.value; else if (id === 'pQ') S.pel.q = e.target.value; else if (id === 'kpQ') S.kp.q = e.target.value; else if (id === 'btQ') S.bt.q = e.target.value; else return;
   clearTimeout(S.tq); S.tq = setTimeout(render, 150);
 });
 $('#main').addEventListener('change', e => {
@@ -1869,7 +2002,9 @@ function bukaTransaksi(i, mod){
     '<div class="seg" role="group" aria-label="Jenis"><button type="button" data-m="Masuk">Stok masuk</button><button type="button" data-m="Keluar">Stok keluar</button><button type="button" data-m="Pindah"'+(kotak > 0 ? '' : ' hidden')+'>Kotak → rak</button><button type="button" data-m="Kiraan">Kiraan semula</button></div>'+
     '<div class="field"><label for="txQ" id="txL">Kuantiti</label><input id="txQ" type="number" inputmode="numeric" min="0" step="1"></div>'+
     '<div class="field" id="txTW"><span class="lbl-s">Simpan di</span><div class="chips"><label class="mini"><input type="radio" name="txT" value="rak" checked> Rak / chiller (dipamerkan)</label><label class="mini"><input type="radio" name="txT" value="kotak"> Dalam kotak / stor</label></div></div>'+
-    '<div class="field" id="txLW"><label for="txLuput">Tarikh luput terdekat</label><input id="txLuput" type="date" value="'+esc(i.luput || '')+'"><span class="hint">Kemas kini jika stok baharu luput lebih awal.</span></div>'+
+    '<div class="grid2" id="txLW"><div class="field"><label for="txLuput">Tarikh luput batch ini</label><input id="txLuput" type="date"><span class="hint">Setiap stok masuk direkod sebagai satu batch (FEFO).</span></div>'+
+    '<div class="field"><label for="txS">Sumber</label><input id="txS" maxlength="60" list="dlSumber" placeholder="Cth: Sumbangan alumni"><datalist id="dlSumber">'+senaraiSumber().map(x => '<option value="'+esc(x)+'">').join('')+'</datalist></div></div>'+
+    '<div class="field" id="txBW"><label for="txB">Keluarkan dari</label><select id="txB"><option value="">Automatik (FEFO: stok lama, kemudian batch paling awal luput)</option>'+(i.batch || []).map(b => '<option value="'+esc(b.id)+'">Batch luput '+esc(b.luput ? tarikhPendek(b.luput) : 'tiada tarikh')+' · baki '+b.baki+(b.sumber ? ' · '+esc(b.sumber) : '')+'</option>').join('')+'</select></div>'+
     '<div class="field"><label for="txC">Catatan (pilihan)</label><input id="txC" maxlength="140"></div>'+
     '<div class="preview" id="txP"></div><div class="err" id="txE"></div></div>'+
     '<div class="dlg-foot"><div class="right"><button type="button" class="btn" data-close>Batal</button><button class="btn primary" id="txGo" type="submit">Simpan</button></div></div></form>');
@@ -1881,7 +2016,7 @@ function bukaTransaksi(i, mod){
     $('#txP').innerHTML = '<span>Stok sekarang <b>'+(i.stok == null ? '–' : kini)+'</b></span><span>Selepas simpan <b style="color:'+(s < 0 ? 'var(--crit)' : 'inherit')+'">'+(s == null ? '–' : s)+'</b> '+esc(u)+'</span>'; };
   const setM = x => { m = x; dlg.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === m)));
     $('#txL').textContent = m === 'Kiraan' ? 'Jumlah sebenar, rak + kotak ('+u+')' : m === 'Pindah' ? 'Kuantiti dikeluarkan dari kotak ke rak ('+u+')' : 'Kuantiti ('+u+')';
-    $('#txLW').hidden = m !== 'Masuk'; $('#txTW').hidden = m !== 'Masuk';
+    $('#txLW').hidden = m !== 'Masuk'; $('#txTW').hidden = m !== 'Masuk'; $('#txBW').hidden = m !== 'Keluar' || !(i.batch || []).length;
     $('#txC').placeholder = m === 'Masuk' ? 'Contoh: Sumbangan alumni / belian koperasi' : m === 'Keluar' ? 'Contoh: Rosak / diagihkan ke program' : m === 'Pindah' ? 'Contoh: Restock rak petang' : 'Contoh: Kiraan mingguan';
     if (m === 'Kiraan' && !$('#txQ').value && i.stok != null) $('#txQ').value = kini; upd(); };
   dlg.querySelectorAll('.seg button').forEach(b => b.onclick = () => setM(b.dataset.m));
@@ -1891,7 +2026,7 @@ function bukaTransaksi(i, mod){
     if (isNaN(q) || q < 0 || (m !== 'Kiraan' && q === 0)) { $('#txE').textContent = m === 'Kiraan' ? 'Masukkan jumlah sebenar (0 atau lebih).' : 'Masukkan kuantiti sekurang-kurangnya 1.'; return; }
     if (m === 'Pindah' && q > kotak) { $('#txE').textContent = 'Dalam kotak hanya ada '+kotak+' '+u+'.'; return; }
     const tempat = (dlg.querySelector('input[name="txT"]:checked') || {}).value || 'rak';
-    aksiStaf('transaksiStok', [i.id, m, q, $('#txC').value.trim(), m === 'Masuk' ? $('#txLuput').value : null, m === 'Masuk' ? tempat : null], $('#txGo'), $('#txE'),
+    aksiStaf('transaksiStok', [i.id, m, q, $('#txC').value.trim(), m === 'Masuk' ? $('#txLuput').value : null, m === 'Masuk' ? tempat : null, m === 'Masuk' ? $('#txS').value.trim() : null, m === 'Keluar' ? $('#txB').value : null], $('#txGo'), $('#txE'),
       m === 'Masuk' ? '+'+q+' '+u+' '+i.nama+(tempat === 'kotak' ? ' disimpan dalam kotak' : ' direkod') : m === 'Keluar' ? '−'+q+' '+u+' '+i.nama+' direkod' : m === 'Pindah' ? q+' '+u+' '+i.nama+' dipindah ke rak' : 'Kiraan '+i.nama+' dikemas kini');
   });
 }
