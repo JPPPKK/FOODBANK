@@ -249,6 +249,53 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
 /* ---------- Tema, pengumuman, tetapan ---------- */
 .hero-slot{border-radius:10px;overflow:hidden;aspect-ratio:4/1;max-width:100%;background:var(--sunk)}
 .hero-slot img{width:100%;height:100%;object-fit:cover;display:block}
+/* papan iklan */
+.iklan-slot:empty{display:none}
+.iklan{position:relative;border-radius:10px;overflow:hidden;background:#0B1020;color:#FFFFFF;isolation:isolate}
+.ik-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.ik-track::-webkit-scrollbar{display:none}
+.ik-slide{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;aspect-ratio:16/9;overflow:hidden}
+.ik-main{position:absolute;inset:0;border:0;padding:0;margin:0;background:transparent;cursor:pointer;display:block;width:100%;height:100%;color:inherit}
+.ik-main:focus-visible{outline:3px solid var(--yellow);outline-offset:-3px}
+.ik-bg{position:absolute;inset:-24px;width:calc(100% + 48px);height:calc(100% + 48px);object-fit:cover;filter:blur(20px) brightness(.55);transform:scale(1.05)}
+.ik-img{position:relative;width:100%;height:100%;object-fit:contain;display:block}
+.ik-muat{position:absolute;inset:0;background:linear-gradient(100deg,#141B33 30%,#202A4D 50%,#141B33 70%);background-size:300% 100%;animation:ikMuat 1.4s linear infinite}
+@keyframes ikMuat{from{background-position:100% 0}to{background-position:0 0}}
+.ik-play{position:absolute;inset:0;margin:auto;width:64px;height:64px;border-radius:50%;background:rgba(0,0,0,.62);display:grid;place-items:center;box-shadow:0 2px 12px rgba(0,0,0,.4)}
+.ik-play::before{content:"";border-style:solid;border-width:12px 0 12px 20px;border-color:transparent transparent transparent #FFFFFF;margin-left:5px}
+.ik-vlbl{position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(0,0,0,.55);padding:3px 8px;border-radius:4px}
+.ik-slide iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.ik-cap{position:absolute;left:0;right:0;bottom:0;padding:34px 14px 26px;background:linear-gradient(transparent,rgba(0,0,0,.72));display:flex;align-items:flex-end;justify-content:space-between;gap:10px;pointer-events:none}
+.ik-cap b{font-size:15px;line-height:1.25;text-shadow:0 1px 3px rgba(0,0,0,.5);overflow-wrap:anywhere}
+.ik-pautan{pointer-events:auto;flex:none;background:var(--yellow);color:var(--on-yellow);font-weight:700;font-size:13px;padding:6px 12px;border-radius:999px;text-decoration:none;white-space:nowrap}
+.ik-nav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#FFFFFF;font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center;z-index:2}
+.ik-nav:hover{background:rgba(0,0,0,.72)}
+.ik-nav.prev{left:8px} .ik-nav.next{right:8px}
+.ik-dots{position:absolute;bottom:4px;left:0;right:0;display:flex;justify-content:center;gap:2px;z-index:2;pointer-events:none}
+.ik-dots button{pointer-events:auto;width:22px;height:20px;border:0;background:transparent;padding:0;cursor:pointer;display:grid;place-items:center}
+.ik-dots button::before{content:"";width:7px;height:7px;border-radius:4px;background:rgba(255,255,255,.55);transition:width .2s}
+.ik-dots button[aria-current="true"]::before{width:18px;background:#FFFFFF}
+.ik-sekali .ik-nav,.ik-sekali .ik-dots{display:none}
+.ik-sekali .ik-cap{padding-bottom:12px}
+#dlgIk{width:min(900px,calc(100vw - 24px));background:#0B1020;color:#FFFFFF}
+#dlgIk img{display:block;width:100%;max-height:calc(100dvh - 150px);object-fit:contain}
+#dlgIk .dlg-foot{border-top-color:rgba(255,255,255,.15)}
+#dlgIk .dlg-foot b{flex:1;min-width:0;overflow-wrap:anywhere}
+.ik-pra{max-width:460px}
+.ikrows{display:flex;flex-direction:column;gap:10px}
+.ikrow{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px}
+.ikrow.mati{opacity:.65}
+.ik-th{width:96px;aspect-ratio:16/9;border-radius:6px;overflow:hidden;background:#0B1020;position:relative;color:#FFFFFF;display:grid;place-items:center;font-size:11px;font-weight:700}
+.ik-th img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ik-th span{position:absolute;left:4px;bottom:4px;background:rgba(0,0,0,.65);padding:1px 5px;border-radius:3px;font-size:9px;letter-spacing:.05em}
+.ik-f{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ik-f input{padding:7px 10px;font-size:14px}
+.ik-a{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.ik-a .tbtns{flex-wrap:nowrap;gap:4px}
+.ik-a .btn{padding:6px 0;width:34px;text-align:center}
+.ikvid{border:1px dashed var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.saat{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.saat input{width:84px}
 .notis{border-radius:10px;padding:12px 16px;background:color-mix(in srgb,var(--yellow) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--yellow) 45%,var(--line))}
 .notis b{display:block;font-family:var(--display);text-transform:uppercase;letter-spacing:.04em;font-size:15px;margin-bottom:2px}
 .notis p{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
@@ -307,13 +354,16 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
   .trow.staf{grid-template-columns:minmax(0,1fr) 40px;grid-template-areas:"e x" "n n" "j j"}
   .trow.staf > :nth-child(1){grid-area:e} .trow.staf > :nth-child(2){grid-area:n} .trow.staf > :nth-child(3){grid-area:j} .trow.staf > :nth-child(4){grid-area:x}
   .trow.staf.pemilik > :nth-child(4){display:none}
+  .ikrow{grid-template-columns:84px minmax(0,1fr);grid-template-areas:"t a" "f f"}
+  .ik-th{width:84px;grid-area:t} .ik-f{grid-area:f} .ik-a{grid-area:a;flex-direction:row;justify-content:space-between;align-items:center}
+  .ik-nav{display:none}
 }
 @media (max-width:560px){
   .band-title h1{font-size:22px;white-space:nowrap}
   .band-act{width:100%}
   .band-act .bbtn{flex:1}
 }
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.ik-track{scroll-behavior:auto}}
 </style>
 </head>
 <body>
@@ -330,6 +380,7 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
   <div class="login-body wrap">
     <form id="fEmail" class="login-card" novalidate>
       <div class="hero-slot" hidden></div>
+      <div class="iklan-slot"></div>
       <div class="notis" id="loginNotis" hidden><b>Pengumuman</b><p></p></div>
       <h2>Log masuk</h2>
       <p>Masukkan e-mel anda. Kami akan hantar kod 6 digit untuk mengesahkan anda.</p>
@@ -390,6 +441,7 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
 </div>
 
 <dialog id="dlg"></dialog>
+<dialog id="dlgIk" aria-label="Iklan"></dialog>
 <input type="file" id="fileGambar" accept="image/png,image/jpeg,image/webp" hidden>
 <div class="toast" id="toast" hidden></div>
 
@@ -750,7 +802,7 @@ function logoHtml(size, lebar){
 }
 document.querySelectorAll('.logo-slot').forEach(el => { el.outerHTML = logoHtml(Number(el.dataset.size), Number(el.dataset.w)); });
 
-function tunjuk(id){ ['#scrLogin','#scrLoad','#scrApp'].forEach(s => $(s).hidden = s !== id); if (id !== '#scrApp') $('#cartbar').hidden = true; }
+function tunjuk(id){ ['#scrLogin','#scrLoad','#scrApp'].forEach(s => $(s).hidden = s !== id); if (id !== '#scrApp') $('#cartbar').hidden = true; letakIklan(); }
 
 /* =====================================================================
    LOG MASUK
@@ -846,6 +898,7 @@ function render(){
   const bm = $('#btnMode'); bm.hidden = !d.saya.staf;
   bm.textContent = S.mode === 'staf' ? 'Paparan pelajar' : 'Paparan staf';
   if (S.mode === 'staf') renderStaf(); else renderPelajar();
+  letakIklan();
 }
 $('#btnMode').onclick = () => { tutupTed(); S.mode = S.mode === 'staf' ? 'pelajar' : 'staf'; window.scrollTo(0,0); render(); };
 
@@ -860,6 +913,7 @@ function renderPelajar(){
   const tutup = k.boleh && !w.buka ? '<div class="closed">Kiosk tutup sekarang. Dibuka semula '+esc(w.seterusnya)+'.</div>' : '';
   const aw = d.awam || {};
   const atas = '<div class="hero-slot"' + (BANNER ? '' : ' hidden') + '>' + (BANNER ? '<img alt="" src="' + BANNER + '">' : '') + '</div>' +
+    '<div class="iklan-slot"></div>' +
     (aw.pengumuman ? '<section class="notis"><b>Pengumuman</b><p>' + esc(aw.pengumuman) + '</p></section>' : '');
   let status;
   if (aw.terima === false) {
@@ -1298,6 +1352,7 @@ function pasangAwam(a){
   document.querySelectorAll('.subtajuk').forEach(el => { el.textContent = a.subtajuk || ''; el.hidden = !a.subtajuk; });
   const n = $('#loginNotis'); if (n) { n.hidden = !a.pengumuman; n.querySelector('p').textContent = a.pengumuman || ''; }
   lukisBanner();
+  binaIklan();
 }
 async function muatBanner(){
   if (!(ADA_GAS || ADA_API) || !AWAM || !AWAM.adaBanner) { BANNER = ''; lukisBanner(); return; }
@@ -1313,6 +1368,192 @@ function lukisBanner(){
 function segarLogo(){
   logoGagal.ya = false;
   document.querySelectorAll('.logo').forEach(el => { el.outerHTML = logoHtml(Number(el.dataset.size) || 44, Number(el.dataset.w) || 100); });
+}
+
+/* =====================================================================
+   PAPAN IKLAN (karusel gambar / video)
+   ===================================================================== */
+const IKG = {};               // id iklan -> data URI gambar
+const IK = { el: null, kunci: '', i: 0, sejak: Date.now(), tahan: false, video: null, tick: null };
+function senaraiIklan(){ return (AWAM && Array.isArray(AWAM.iklan)) ? AWAM.iklan : []; }
+function saatIklan(){ const n = Number(AWAM && AWAM.iklanSaat); return n >= 3 ? n : 6; }
+function kurangGerak(){ return window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; }
+function isiSlaid(x){
+  if (x.jenis === 'video') {
+    return '<button type="button" class="ik-main" data-ik="main" aria-label="Main video' + (x.tajuk ? ': ' + esc(x.tajuk) : '') + '">' +
+      (x.thumb ? '<img class="ik-bg" alt="" src="' + esc(x.thumb) + '" onerror="this.remove()"><img class="ik-img" alt="" src="' + esc(x.thumb) + '" onerror="this.remove()">' : '') +
+      '<span class="ik-vlbl">Video</span><span class="ik-play"></span></button>';
+  }
+  const g = IKG[x.id];
+  return '<button type="button" class="ik-main" data-ik="main" aria-label="Lihat iklan' + (x.tajuk ? ': ' + esc(x.tajuk) : '') + '">' +
+    (g ? '<img class="ik-bg" alt="" src="' + g + '"><img class="ik-img" alt="' + esc(x.tajuk || 'Iklan') + '" src="' + g + '">' : '<span class="ik-muat"></span>') + '</button>';
+}
+function kapsyen(x){
+  if (!x.tajuk && !x.pautan) return '';
+  return '<div class="ik-cap"><b>' + esc(x.tajuk || '') + '</b>' + (x.pautan ? '<a class="ik-pautan" href="' + esc(x.pautan) + '" target="_blank" rel="noopener">Lihat lanjut ↗</a>' : '') + '</div>';
+}
+function binaIklan(){
+  const L = senaraiIklan();
+  const kunci = JSON.stringify(L.map(x => [x.id, x.tajuk, x.pautan, x.embed])) + '|' + saatIklan();
+  if (IK.el && IK.kunci === kunci) { letakIklan(); return; }
+  IK.kunci = kunci;
+  if (!L.length) { if (IK.el) IK.el.remove(); IK.el = null; clearInterval(IK.tick); return; }
+  if (!IK.el) {
+    IK.el = document.createElement('div');
+    IK.el.className = 'iklan';
+    IK.el.setAttribute('role', 'region');
+    IK.el.setAttribute('aria-roledescription', 'karusel');
+    IK.el.setAttribute('aria-label', 'Papan iklan');
+    IK.el.tabIndex = -1;
+    pasangAcaraIklan(IK.el);
+  }
+  IK.video = null;
+  IK.el.classList.toggle('ik-sekali', L.length < 2);
+  IK.el.innerHTML = '<div class="ik-track">' + L.map((x, i) => '<div class="ik-slide" role="group" aria-roledescription="slaid" aria-label="' + (i + 1) + ' daripada ' + L.length + '" data-i="' + i + '">' + isiSlaid(x) + kapsyen(x) + '</div>').join('') + '</div>' +
+    '<button type="button" class="ik-nav prev" data-ik="prev" aria-label="Iklan sebelumnya">‹</button><button type="button" class="ik-nav next" data-ik="next" aria-label="Iklan seterusnya">›</button>' +
+    '<div class="ik-dots">' + L.map((x, i) => '<button type="button" data-ik="dot" data-i="' + i + '" aria-label="Iklan ' + (i + 1) + '"></button>').join('') + '</div>';
+  IK.i = Math.min(IK.i, L.length - 1);
+  kemasTitik();
+  letakIklan();
+  muatGambarIklan(L);
+  mulaAutoIklan();
+}
+function slotIklan(){
+  return Array.from(document.querySelectorAll('.iklan-slot')).find(s => !s.closest('[hidden]')) || null;
+}
+function letakIklan(){
+  if (!IK.el) return;
+  const slot = slotIklan();
+  if (!slot) return;
+  if (IK.el.parentNode !== slot) {
+    slot.appendChild(IK.el);
+    if (IK.video) { pulihVideo(); }
+    const tr = IK.el.querySelector('.ik-track');
+    requestAnimationFrame(() => { tr.scrollLeft = IK.i * tr.clientWidth; });
+    IK.sejak = Date.now();
+  }
+}
+function kemasTitik(){
+  if (!IK.el) return;
+  IK.el.querySelectorAll('.ik-dots button').forEach((b, i) => b.setAttribute('aria-current', String(i === IK.i)));
+}
+function pergiIklan(i, lancar){
+  const n = senaraiIklan().length; if (!IK.el || !n) return;
+  i = (i + n) % n;
+  const tr = IK.el.querySelector('.ik-track');
+  tr.scrollTo({ left: i * tr.clientWidth, behavior: lancar === false || kurangGerak() ? 'auto' : 'smooth' });
+  if (i !== IK.i) { IK.i = i; kemasTitik(); pulihVideo(); }
+  IK.sejak = Date.now();
+}
+function pulihVideo(){
+  if (!IK.video || !IK.el) { IK.video = null; return; }
+  const sl = IK.el.querySelector('.ik-slide[data-i="' + IK.video.i + '"]');
+  const x = senaraiIklan()[IK.video.i];
+  if (sl && x) sl.innerHTML = isiSlaid(x) + kapsyen(x);
+  IK.video = null;
+}
+function mulaAutoIklan(){
+  clearInterval(IK.tick);
+  if (senaraiIklan().length < 2) return;
+  IK.sejak = Date.now();
+  IK.tick = setInterval(() => {
+    if (!IK.el || !IK.el.isConnected || document.hidden || IK.tahan || IK.video || $('#dlgIk').open) { if (IK.tahan || IK.video) IK.sejak = Date.now(); return; }
+    if (Date.now() - IK.sejak >= saatIklan() * 1000) pergiIklan(IK.i + 1);
+  }, 500);
+}
+function pasangAcaraIklan(el){
+  el.addEventListener('click', e => {
+    const b = e.target.closest('[data-ik]'); if (!b) return;
+    e.preventDefault();
+    const k = b.dataset.ik;
+    if (k === 'prev') return pergiIklan(IK.i - 1);
+    if (k === 'next') return pergiIklan(IK.i + 1);
+    if (k === 'dot') return pergiIklan(Number(b.dataset.i));
+    if (k === 'main') {
+      const sl = b.closest('.ik-slide'); const i = Number(sl.dataset.i); const x = senaraiIklan()[i]; if (!x) return;
+      if (i !== IK.i) pergiIklan(i);
+      if (x.jenis === 'video') {
+        if (!x.embed) return;
+        pulihVideo();
+        const src = x.embed + (x.embed.indexOf('youtube') >= 0 ? '&autoplay=1' : '');
+        sl.innerHTML = '<iframe src="' + esc(src) + '" title="' + esc(x.tajuk || 'Video iklan') + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+        IK.video = { i: i };
+        return;
+      }
+      bukaIklanBesar(x);
+    }
+  });
+  el.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); pergiIklan(IK.i - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); pergiIklan(IK.i + 1); }
+  });
+  el.addEventListener('mouseenter', () => { IK.tahan = true; });
+  el.addEventListener('mouseleave', () => { IK.tahan = false; IK.sejak = Date.now(); });
+  el.addEventListener('focusin', e => { if (e.target.matches(':focus-visible')) IK.tahan = true; });
+  el.addEventListener('focusout', () => { IK.tahan = false; });
+  el.addEventListener('touchstart', () => { IK.sejak = Date.now() + 4000; }, { passive: true });
+  let rf = 0;
+  el.addEventListener('scroll', e => {
+    if (!e.target.classList || !e.target.classList.contains('ik-track')) return;
+    cancelAnimationFrame(rf);
+    rf = requestAnimationFrame(() => {
+      const tr = e.target; if (!tr.clientWidth) return;
+      const i = Math.round(tr.scrollLeft / tr.clientWidth);
+      if (i !== IK.i && i >= 0 && i < senaraiIklan().length) { IK.i = i; kemasTitik(); pulihVideo(); IK.sejak = Date.now(); }
+    });
+  }, true);
+}
+window.addEventListener('resize', () => { if (IK.el && IK.el.isConnected) { const tr = IK.el.querySelector('.ik-track'); tr.scrollLeft = IK.i * tr.clientWidth; } });
+function bukaIklanBesar(x){
+  const g = IKG[x.id]; if (!g) return;
+  const d = $('#dlgIk');
+  d.innerHTML = '<img alt="' + esc(x.tajuk || 'Iklan') + '" src="' + g + '"><div class="dlg-foot"><b>' + esc(x.tajuk || '') + '</b><div class="right">' +
+    (x.pautan ? '<a class="btn primary" href="' + esc(x.pautan) + '" target="_blank" rel="noopener">Lihat lanjut ↗</a>' : '') +
+    '<button type="button" class="btn" data-ik-tutup>Tutup</button></div></div>';
+  d.showModal();
+}
+$('#dlgIk').addEventListener('click', e => { if (e.target.closest('[data-ik-tutup]') || e.target === e.currentTarget) e.currentTarget.close(); });
+const IK_ANTRI = new Set(); let muatIkSedang = false;
+async function muatGambarIklan(L){
+  const ids = (L || []).filter(x => x.jenis === 'gambar').map(x => x.id);
+  ids.forEach(id => { if (!IKG[id]) { try { const c = localStorage.getItem('fbjpp_ik_' + id); if (c) IKG[id] = c; } catch (e) {} } });
+  segarGambarIklan();
+  if (!(ADA_GAS || ADA_API)) return;
+  ids.forEach(id => { if (!IKG[id]) IK_ANTRI.add(id); });
+  if (muatIkSedang) return;
+  muatIkSedang = true;
+  try {
+    while (IK_ANTRI.size) {
+      const id = IK_ANTRI.values().next().value; IK_ANTRI.delete(id);
+      if (IKG[id]) continue;
+      let g = '';
+      try { g = await api('iklanGambar', id) || ''; } catch (e) { g = ''; }
+      if (!g) continue;
+      IKG[id] = g;
+      simpanCacheIklan(id, g);
+      segarGambarIklan();
+    }
+  } finally { muatIkSedang = false; }
+}
+function simpanCacheIklan(id, g){
+  try {
+    const simpan = new Set(senaraiIklan().map(x => 'fbjpp_ik_' + x.id).concat(S.ted && S.ted.iklan ? S.ted.iklan.map(x => 'fbjpp_ik_' + x.id) : []));
+    for (let i = localStorage.length - 1; i >= 0; i--) { const k = localStorage.key(i); if (k && k.indexOf('fbjpp_ik_') === 0 && !simpan.has(k) && k !== 'fbjpp_ik_' + id) localStorage.removeItem(k); }
+    localStorage.setItem('fbjpp_ik_' + id, g);
+  } catch (e) {}
+}
+function segarGambarIklan(){
+  if (IK.el) {
+    senaraiIklan().forEach((x, i) => {
+      if (x.jenis !== 'gambar' || !IKG[x.id]) return;
+      const sl = IK.el.querySelector('.ik-slide[data-i="' + i + '"]');
+      if (sl && sl.querySelector('.ik-muat')) sl.innerHTML = isiSlaid(x) + kapsyen(x);
+    });
+  }
+  document.querySelectorAll('.ik-th[data-ikth]').forEach(el => {
+    const g = IKG[el.dataset.ikth];
+    if (g && !el.querySelector('img')) el.insertAdjacentHTML('afterbegin', '<img alt="" src="' + g + '">');
+  });
 }
 
 /* =====================================================================
@@ -1334,8 +1575,19 @@ function mulaTed(){
     nilai: Object.assign({}, t.nilai),
     sesi: pecahSesi(t.nilai.WAKTU_OPERASI),
     had: t.had.map(r => ({ kategori: r.kategori, had: r.had === '' || r.had == null ? '' : r.had, papar: r.kategori.indexOf('+') >= 0 ? true : !/^tidak$/i.test(r.papar || ''), ket: r.ket || '', satuJenis: !!r.satuJenis })),
-    staf: t.staf.map(r => Object.assign({}, r))
+    staf: t.staf.map(r => Object.assign({}, r)),
+    iklan: petaIklanTed(S.d.urus.iklan),
+    ikBuang: [],
+    ikSaat: String(t.nilai.IKLAN_SAAT || (S.d.awam && S.d.awam.iklanSaat) || 6),
+    ikVideo: null
   };
+}
+function petaIklanTed(L){ return (L || []).map(x => ({ id: x.id, jenis: x.jenis, tajuk: x.tajuk || '', pautan: x.pautan || '', aktif: x.aktif !== false, thumb: x.thumb || '' })); }
+function gabungIklanTed(d){
+  const T = S.ted, baru = petaIklanTed(d.urus.iklan);
+  const ada = T.iklan.filter(x => baru.some(y => y.id === x.id));
+  baru.forEach(y => { if (!ada.some(x => x.id === y.id) && T.ikBuang.indexOf(y.id) < 0) ada.push(y); });
+  T.iklan = ada;
 }
 function tutupTed(){ if (S.ted) { S.ted = null; pasangTema(S.d.awam.tema); } }
 
@@ -1350,6 +1602,7 @@ function pilihan(jenis, senarai, kini, isi){
 function stafTetapan(){
   if (!S.ted) mulaTed();
   const T = S.ted, t = T.tema, n = T.nilai, ts = S.d.urus.tetapan;
+  muatGambarIklan(T.iklan);
   Object.keys(FON).forEach(muatFon);
   const latarWarna = { asal:'#F1F3F7', lembut: campur(t.utama, '#FFFFFF', .93), sederhana: campur(t.utama, '#FFFFFF', .84), putih:'#FFFFFF' };
   const tema = '<section class="panel"><div class="panel-head"><h3>Tema</h3><span>Perubahan dipaparkan serta-merta. Tekan Simpan untuk semua pengguna.</span></div><div class="panel-body tset">' +
@@ -1410,7 +1663,29 @@ function stafTetapan(){
     '<div class="tbtns"><button type="button" class="btn" data-tt="tambah-staf">+ Tambah staf</button></div>' +
     '<div class="err" id="errStaf"></div><div class="tfoot"><span></span><button type="button" class="btn primary" data-tt="simpan-staf">Simpan senarai staf</button></div></div></section>';
 
-  return tema + teks + aturan + had + staf;
+  const IL = T.iklan;
+  const iklan = '<section class="panel"><div class="panel-head"><h3>Papan iklan</h3><span>Gambar atau video yang bergerak kiri kanan di skrin log masuk dan paparan pelajar</span></div><div class="panel-body tset">' +
+    '<div class="tgrp"><div class="tlbl">Iklan (' + IL.length + ')</div><div class="hint">Susun dengan ↑ ↓. Nyahtanda "Papar" untuk sembunyikan iklan tanpa membuangnya. Tajuk dan pautan adalah pilihan. Perubahan hanya disimpan apabila anda tekan "Simpan papan iklan".</div>' +
+      '<div class="ikrows">' + (IL.length ? IL.map((x, i) => '<div class="ikrow' + (x.aktif ? '' : ' mati') + '">' +
+        '<div class="ik-th"' + (x.jenis === 'gambar' ? ' data-ikth="' + esc(x.id) + '"' : '') + '>' + (x.jenis === 'gambar' ? (IKG[x.id] ? '<img alt="" src="' + IKG[x.id] + '">' : '') : (x.thumb ? '<img alt="" src="' + esc(x.thumb) + '" onerror="this.remove()">' : '')) + '<span>' + (x.jenis === 'video' ? 'VIDEO' : 'GAMBAR') + '</span></div>' +
+        '<div class="ik-f"><input id="ik' + i + 't" data-tik="' + i + '|tajuk" maxlength="120" placeholder="Tajuk (pilihan)" aria-label="Tajuk iklan ' + (i + 1) + '" value="' + esc(x.tajuk) + '">' +
+          '<input id="ik' + i + 'p" data-tik="' + i + '|pautan" type="url" inputmode="url" placeholder="Pautan butang Lihat lanjut (pilihan) https://" aria-label="Pautan iklan ' + (i + 1) + '" value="' + esc(x.pautan) + '"></div>' +
+        '<div class="ik-a"><label class="mini"><input type="checkbox" data-tik="' + i + '|aktif"' + (x.aktif ? ' checked' : '') + '>Papar</label><div class="tbtns">' +
+          '<button type="button" class="btn" data-tt="ik-naik" data-i="' + i + '" aria-label="Naikkan"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+          '<button type="button" class="btn" data-tt="ik-turun" data-i="' + i + '" aria-label="Turunkan"' + (i === IL.length - 1 ? ' disabled' : '') + '>↓</button>' +
+          '<button type="button" class="btn danger" data-tt="ik-buang" data-i="' + i + '" aria-label="Buang iklan">×</button></div></div></div>').join('')
+        : '<div class="hint">Belum ada iklan. Tambah gambar (poster, pengumuman program) atau video.</div>') + '</div>' +
+      '<div class="tbtns"><button type="button" class="btn" data-tt="ik-gambar">+ Tambah gambar</button><button type="button" class="btn" data-tt="ik-video">+ Tambah video</button></div>' +
+      (T.ikVideo ? '<div class="ikvid"><div class="field"><label for="ikvUrl">Pautan video</label><input id="ikvUrl" data-tikv="url" type="url" inputmode="url" placeholder="https://youtu.be/… atau https://drive.google.com/file/d/…" value="' + esc(T.ikVideo.url) + '"></div>' +
+        '<div class="hint">YouTube: boleh guna video "Tidak tersenarai" (Unlisted). Google Drive: tetapkan perkongsian fail kepada "Sesiapa yang mempunyai pautan".</div>' +
+        '<div class="field"><label for="ikvTajuk">Tajuk (pilihan)</label><input id="ikvTajuk" data-tikv="tajuk" maxlength="120" value="' + esc(T.ikVideo.tajuk) + '"></div>' +
+        '<div class="tbtns"><button type="button" class="btn primary" data-tt="ik-video-tambah">Tambah video</button><button type="button" class="btn" data-tt="ik-video-batal">Batal</button></div></div>' : '') +
+    '</div>' +
+    '<div class="tgrp"><div class="tlbl">Kelajuan</div><div class="saat"><span>Tukar iklan setiap</span><input id="ikSaat" type="number" min="3" max="60" inputmode="numeric" data-tiks="1" value="' + esc(T.ikSaat) + '" aria-label="Saat setiap iklan"><span>saat</span></div><div class="hint">Iklan berhenti bergerak semasa video dimainkan atau apabila pelajar sedang meleret.</div></div>' +
+    (senaraiIklan().length ? '<div class="tgrp"><div class="tlbl">Pratonton</div><div class="hint">Iklan yang sudah disimpan dan dipaparkan kepada pelajar</div><div class="ik-pra"><div class="iklan-slot"></div></div></div>' : '') +
+    '<div class="err" id="errIklan"></div><div class="tfoot"><span></span><button type="button" class="btn primary" data-tt="simpan-iklan">Simpan papan iklan</button></div></div></section>';
+
+  return tema + teks + iklan + aturan + had + staf;
 }
 
 function kemasTed(el){
@@ -1422,6 +1697,9 @@ function kemasTed(el){
   if (d.th) { set(T.had, d.th, el.type === 'checkbox' ? el.checked : el.value); return true; }
   if (d.ts) { set(T.staf, d.ts, el.value); return true; }
   if (d.tsesi) { set(T.sesi, d.tsesi, el.value); return true; }
+  if (d.tik) { set(T.iklan, d.tik, el.type === 'checkbox' ? el.checked : el.value); if (el.type === 'checkbox') el.closest('.ikrow').classList.toggle('mati', !el.checked); return true; }
+  if (d.tikv) { if (T.ikVideo) T.ikVideo[d.tikv] = el.value; return true; }
+  if (d.tiks) { T.ikSaat = el.value; return true; }
   return false;
 }
 
@@ -1450,6 +1728,26 @@ async function aksiTed(b){
   if (tt === 'buang-had') { T.had.splice(i, 1); render(); return; }
   if (tt === 'tambah-staf') { T.staf.push({ email:'', nama:'', jawatan:'' }); render(); const el = $('#tf' + (T.staf.length - 1) + 'e'); if (el) el.focus(); return; }
   if (tt === 'buang-staf') { T.staf.splice(i, 1); render(); return; }
+  if (tt === 'ik-gambar') { const f = $('#fileGambar'); f.dataset.jenis = 'iklan'; f.value = ''; f.click(); return; }
+  if (tt === 'ik-video') { T.ikVideo = T.ikVideo || { url:'', tajuk:'' }; render(); const el = $('#ikvUrl'); if (el) el.focus(); return; }
+  if (tt === 'ik-video-batal') { T.ikVideo = null; render(); return; }
+  if (tt === 'ik-naik' || tt === 'ik-turun') { const j = tt === 'ik-naik' ? i - 1 : i + 1; if (j < 0 || j >= T.iklan.length) return; const x = T.iklan[i]; T.iklan[i] = T.iklan[j]; T.iklan[j] = x; render(); return; }
+  if (tt === 'ik-buang') { const x = T.iklan.splice(i, 1)[0]; if (x) T.ikBuang.push(x.id); render(); toast('Iklan dibuang. Tekan "Simpan papan iklan" untuk sahkan.'); return; }
+  if (tt === 'ik-video-tambah') {
+    const v = T.ikVideo || {}; const url = String(v.url || '').trim();
+    if (!url) { $('#errIklan').textContent = 'Masukkan pautan video YouTube atau Google Drive.'; return; }
+    const d = await simpanTed(b, 'errIklan', 'tambahIklanVideo', [url, v.tajuk || '']);
+    if (d) { T.ikVideo = null; gabungIklanTed(d); render(); toast('Video ditambah ke papan iklan'); }
+    return;
+  }
+  if (tt === 'simpan-iklan') {
+    const saat = Number(T.ikSaat);
+    if (!(saat >= 3 && saat <= 60)) { $('#errIklan').textContent = 'Masa setiap iklan mesti antara 3 hingga 60 saat.'; return; }
+    for (const x of T.iklan) if (x.pautan.trim() && !/^https?:\/\/\S+$/i.test(x.pautan.trim())) { $('#errIklan').textContent = 'Pautan "' + x.pautan + '" tidak sah. Pautan mesti bermula dengan https://'; return; }
+    const d = await simpanTed(b, 'errIklan', 'simpanIklan', [T.iklan.map(x => ({ id: x.id, tajuk: x.tajuk, pautan: x.pautan.trim(), aktif: x.aktif })), saat]);
+    if (d) { mulaTedBahagian('iklan'); render(); toast('Papan iklan disimpan'); }
+    return;
+  }
   if (tt === 'muat-banner' || tt === 'muat-logo') { const f = $('#fileGambar'); f.dataset.jenis = tt === 'muat-logo' ? 'logo' : 'banner'; f.value = ''; f.click(); return; }
   if (tt === 'buang-banner' || tt === 'asal-logo') {
     const jenis = tt === 'asal-logo' ? 'logo' : 'banner';
@@ -1492,6 +1790,7 @@ function mulaTedBahagian(b){
   const t = S.d.urus.tetapan;
   if (b === 'had') S.ted.had = t.had.map(r => ({ kategori: r.kategori, had: r.had === '' || r.had == null ? '' : r.had, papar: r.kategori.indexOf('+') >= 0 ? true : !/^tidak$/i.test(r.papar || ''), ket: r.ket || '', satuJenis: !!r.satuJenis }));
   if (b === 'staf') S.ted.staf = t.staf.map(r => Object.assign({}, r));
+  if (b === 'iklan') { S.ted.iklan = petaIklanTed(S.d.urus.iklan); S.ted.ikBuang = []; S.ted.ikSaat = String(t.nilai.IKLAN_SAAT || S.d.awam.iklanSaat || 6); }
 }
 
 function bacaGambar(file, maxW, maxH, kekalPng){
@@ -1520,6 +1819,23 @@ $('#fileGambar').addEventListener('change', async e => {
   const jenis = e.target.dataset.jenis || 'banner';
   const err = $('#errTema'); if (err) err.textContent = '';
   toast('Memuat naik gambar…');
+  if (jenis === 'iklan') {
+    const er = $('#errIklan'); if (er) er.textContent = '';
+    try {
+      const uri = await bacaGambar(f, 1280, 1280, false);
+      const sebelum = (S.d.urus.iklan || []).map(x => x.id);
+      const d = await api('tambahIklanGambar', S.token, uri, '');
+      const baru = (d.urus.iklan || []).find(x => sebelum.indexOf(x.id) < 0);
+      if (baru) { IKG[baru.id] = uri; simpanCacheIklan(baru.id, uri); }
+      S.d = d; pasangAwam(d.awam);
+      if (S.ted) gabungIklanTed(d);
+      render(); toast('Gambar ditambah ke papan iklan');
+    } catch (x) {
+      if (sesiTamat(x)) return logKeluar();
+      const er2 = $('#errIklan'); if (er2) er2.textContent = mesejRalat(x); else toast(mesejRalat(x));
+    }
+    return;
+  }
   try {
     const uri = await bacaGambar(f, jenis === 'logo' ? 640 : 1600, jenis === 'logo' ? 640 : 800, jenis === 'logo');
     const d = await api('simpanGambar', S.token, jenis, uri);
