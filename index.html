@@ -19,6 +19,9 @@
   --warn:#9A5B00; --warn-bg:#FCEFD3;
   --crit:#C3312A; --crit-bg:#FBE3E1;
   --neutral-bg:#E6EAF1;
+  --c1:#2a78d6; --c2:#eb6834; --c3:#1baf7a; --c4:#eda100; --c5:#e87ba4; --c-lain:#A3ABBA;
+  --s-good:#0ca30c; --s-warn:#fab219; --s-crit:#d03b3b; --s-none:#A3ABBA;
+  --v-grid:#E6E9EF; --v-axis:#C3C9D4; --v-band:rgba(12,163,12,.10);
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"Figtree",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
 }
@@ -32,6 +35,8 @@
   --warn:#F2AE4B; --warn-bg:#3A2A0F;
   --crit:#FF7A70; --crit-bg:#3E1A19;
   --neutral-bg:#222C40;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; --c-lain:#5E6880;
+  --s-none:#5E6880; --v-grid:#232D42; --v-axis:#36415A; --v-band:rgba(12,163,12,.16);
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
@@ -44,6 +49,8 @@
   --warn:#F2AE4B; --warn-bg:#3A2A0F;
   --crit:#FF7A70; --crit-bg:#3E1A19;
   --neutral-bg:#222C40;
+  --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; --c-lain:#5E6880;
+  --s-none:#5E6880; --v-grid:#232D42; --v-axis:#36415A; --v-band:rgba(12,163,12,.16);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
@@ -212,7 +219,102 @@ button.tile:hover{border-color:var(--muted)}
 .acts .btn{padding:7px 10px;font-size:14px}
 .btn.in{color:var(--ok)} .btn.out{color:var(--crit)}
 .lt{font-family:var(--display);font-weight:700;font-size:18px}
-.lt.masuk{color:var(--ok)} .lt.keluar,.lt.ambilan,.lt.padam{color:var(--crit)} .lt.kiraan{color:var(--blue)}
+.st-sah{background:var(--ok-bg);color:var(--ok)}
+.st-menunggu{background:var(--warn-bg);color:var(--warn)}
+.btn.sah{background:var(--ok);color:#FFFFFF;border-color:var(--ok)}
+.banner.ok{background:var(--ok-bg);color:var(--ok)}
+.banner .btn{margin-left:8px}
+.banner-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.resit-st{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13px;border-radius:999px;padding:4px 12px}
+/* laporan & carta */
+.lap-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.vgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.vcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.vcard.lebar{grid-column:1/-1}
+.vcard h4{margin:0;font-size:15px;font-weight:700}
+.vcard .vsub{margin:-6px 0 0;font-size:13px;color:var(--muted)}
+.vcard details summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600}
+.vcard table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.vcard th,.vcard td{text-align:left;padding:5px 6px;border-top:1px solid var(--line)}
+.vcard td.n,.vcard th.n{text-align:right;font-variant-numeric:tabular-nums}
+.vkosong{color:var(--muted);font-size:14px;padding:18px 0;text-align:center}
+.hbars{display:flex;flex-direction:column;gap:6px}
+.hb{display:grid;grid-template-columns:minmax(0,38%) minmax(0,1fr) 44px;gap:10px;align-items:center;font-size:13px;border-radius:6px;padding:2px 4px;margin:0 -4px;outline-offset:2px}
+.hb:hover,.hb:focus-visible{background:var(--sunk)}
+.hb .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hb .tr{height:14px;position:relative}
+.hb .fl{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0;min-width:2px}
+.hb .vl{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.hb .tk{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55}
+.hb.dv .tr::before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--v-axis)}
+.hb.dv .fl{border-radius:0 4px 4px 0}
+.hb.dv .fl.neg{border-radius:4px 0 0 4px}
+.vlegend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+.vlegend span{display:inline-flex;align-items:center;gap:6px}
+.vlegend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.vlegend i.ln{height:2px;width:14px;border-radius:1px}
+.vlegend b{color:var(--ink);font-weight:700}
+.donut-wrap{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center}
+.donut-wrap .vlegend{flex-direction:column;flex-wrap:nowrap;gap:8px}
+.lg-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lg-row .lg-n{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.lg-row b{white-space:nowrap}
+.svgc{width:100%;display:block;overflow:visible}
+.svgc text{font-size:11px;fill:var(--muted);font-family:var(--body)}
+.svgc .tip:hover,.svgc .tip:focus{opacity:.8;outline:none}
+.stbar{display:flex;gap:2px;height:16px;border-radius:4px;overflow:hidden}
+.stbar div{min-width:3px}
+#vizTip{position:fixed;z-index:60;pointer-events:none;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.18);max-width:260px}
+#vizTip b{display:block;font-size:15px}
+#vizTip span{color:var(--muted)}
+.lap-muat{opacity:.55;transition:opacity .2s}
+/* staf meal & suhu */
+.meal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.meter{height:10px;border-radius:5px;background:color-mix(in srgb,var(--c1) 18%,var(--surface));overflow:hidden;min-width:160px;flex:1;max-width:320px}
+.meter i{display:block;height:100%;background:var(--c1);border-radius:5px}
+.sm-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 16px;border-top:1px solid var(--line)}
+.sesi-k{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.sesi-c{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.sesi-c h4{margin:0;font-size:15px}
+.sesi-c .ln{display:flex;justify-content:space-between;gap:8px;font-size:14px;align-items:center}
+.suhu-in{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.suhu-in input{font-family:var(--display);font-size:24px;font-weight:700}
+.julat{font-size:12px;color:var(--muted)}
+.julat.luar{color:var(--crit);font-weight:700}
+.semak{display:flex;flex-direction:column;gap:8px}
+.semak label{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer;padding:8px 10px;border:1px solid var(--line);border-radius:8px}
+.semak label input{width:20px;height:20px;flex:none;margin-top:1px}
+.semak label:has(input:checked){background:var(--ok-bg);border-color:transparent}
+.st-luar{background:var(--crit-bg);color:var(--crit)}
+/* kiraan stok pukal */
+.kp-head{display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between}
+.kp-prog{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.kp-prog b{font-family:var(--display);font-size:22px;color:var(--ink)}
+.kp-cat{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 16px;background:var(--sunk);border-top:1px solid var(--line);font-weight:700;font-size:14px}
+.kp-cat span{font-weight:600;font-size:13px;color:var(--muted)}
+.kp-in{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.kp-sis span{font-size:12px}
+.kp-row{display:grid;grid-template-columns:minmax(0,1fr) 110px 180px 64px;gap:10px;align-items:center;padding:10px 16px;border-top:1px solid var(--line)}
+.kp-row.dikira{background:color-mix(in srgb,var(--ok) 5%,var(--surface))}
+.kp-sis{text-align:right;font-size:13px;color:var(--muted)}
+.kp-sis b{display:block;font-family:var(--display);font-size:22px;color:var(--ink);line-height:1}
+.kp-row input{text-align:center;font-family:var(--display);font-size:20px;font-weight:700;padding:6px 8px}
+.kp-row input::placeholder{font-family:var(--body);font-size:13px;font-weight:500}
+.kp-foot .err:empty{display:none}
+.kp-beza{font-family:var(--display);font-weight:700;font-size:18px;text-align:center;border-radius:6px;padding:4px 0}
+.kp-beza.tepat{color:var(--ok)} .kp-beza.kurang{color:var(--crit);background:var(--crit-bg)} .kp-beza.lebih{color:var(--blue);background:var(--sunk)} .kp-beza.kosong{color:var(--muted)}
+.kp-foot{position:sticky;bottom:0;z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:end;box-shadow:0 -6px 18px rgba(0,0,0,.08)}
+.kp-foot .field{flex:1;min-width:200px}
+.lap-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.lap-tiles div{background:var(--sunk);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column}
+.lap-tiles b{font-family:var(--display);font-size:24px;line-height:1.1}
+.lap-tiles span{font-size:12px;color:var(--muted)}
+.lap-cat{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.lap-cat h4{margin:0;padding:8px 12px;background:var(--sunk);font-size:14px;display:flex;justify-content:space-between;gap:8px}
+.lap-cat li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;padding:7px 12px;border-top:1px solid var(--line);font-size:14px;align-items:center}
+.lap-cat ul{list-style:none;margin:0;padding:0}
+.lap-tukar{font-size:12px;font-weight:600;color:var(--warn);padding:6px 12px;background:var(--warn-bg)}
+.lt.masuk{color:var(--ok)} .lt.keluar,.lt.ambilan,.lt.padam,.lt.staf{color:var(--crit)} .lt.pindah{color:var(--muted)} .lt.kiraan{color:var(--blue)}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
 
 /* ---------- Dialog ---------- */
@@ -225,7 +327,7 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
 .dlg-body.flush{padding:0;gap:0;max-height:52vh;overflow:auto}
 .dlg-foot{padding:12px 18px 16px;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;border-top:1px solid var(--line);align-items:center}
 .dlg-foot .right{display:flex;gap:8px;margin-left:auto}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--sunk);padding:4px;border-radius:8px;gap:4px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--sunk);padding:4px;border-radius:8px;gap:4px}
 .seg button{border:0;background:transparent;padding:8px;border-radius:6px;font-weight:600;color:var(--muted);cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.1)}
 .preview{background:var(--sunk);border-radius:8px;padding:10px 12px;font-size:14px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
@@ -335,6 +437,7 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
 .trow input:disabled{opacity:.7}
 .mini{display:flex;gap:6px;align-items:center;font-size:13px;font-weight:600;cursor:pointer}
 .mini input{width:auto}
+.lbl-s{font-size:13px;font-weight:600;color:var(--muted)}
 .tgab{text-align:center}
 @media (max-width:760px){
   .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -354,6 +457,14 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
   .trow.staf{grid-template-columns:minmax(0,1fr) 40px;grid-template-areas:"e x" "n n" "j j"}
   .trow.staf > :nth-child(1){grid-area:e} .trow.staf > :nth-child(2){grid-area:n} .trow.staf > :nth-child(3){grid-area:j} .trow.staf > :nth-child(4){grid-area:x}
   .trow.staf.pemilik > :nth-child(4){display:none}
+  .vgrid{grid-template-columns:1fr}
+  .suhu-in{grid-template-columns:1fr 1fr}
+  .donut-wrap{grid-template-columns:110px minmax(0,1fr)}
+  .hb{grid-template-columns:minmax(0,42%) minmax(0,1fr) 40px}
+  .kp-row{grid-template-columns:minmax(0,1fr) 64px;grid-template-areas:"n b" "s b" "i i"}
+  .kp-row > :nth-child(1){grid-area:n} .kp-row > :nth-child(2){grid-area:s;text-align:left} .kp-row > :nth-child(3){grid-area:i} .kp-row > :nth-child(4){grid-area:b}
+  .kp-sis b{display:inline;font-size:15px}
+  .lap-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
   .ikrow{grid-template-columns:84px minmax(0,1fr);grid-template-areas:"t a" "f f"}
   .ik-th{width:84px;grid-area:t} .ik-f{grid-area:f} .ik-a{grid-area:a;flex-direction:row;justify-content:space-between;align-items:center}
   .ik-nav{display:none}
@@ -442,6 +553,7 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
 
 <dialog id="dlg"></dialog>
 <dialog id="dlgIk" aria-label="Iklan"></dialog>
+<div id="vizTip" role="status" hidden></div>
 <input type="file" id="fileGambar" accept="image/png,image/jpeg,image/webp" hidden>
 <div class="toast" id="toast" hidden></div>
 
@@ -744,7 +856,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbw8f1-UCr59JL1OsePQElfC
 const ADA_API = !ADA_GAS && /^https?:\/\//.test(API_URL);
 const KUNCI_TOKEN = 'fbjpp_token';
 const S = { token:null, d:null, mode:'pelajar', tab:'ringkasan', pick:{}, emailLogin:'',
-  stok:{q:'',cat:'',st:''}, amb:{q:'',src:''}, pel:{q:'',st:''}, log:{t:''} };
+  stok:{q:'',cat:'',st:''}, amb:{q:'',src:''}, pel:{q:'',st:''}, log:{t:''}, kp:null };
 
 /* ---------- utilities ---------- */
 const $ = s => document.querySelector(s);
@@ -935,9 +1047,12 @@ function renderPelajar(){
   }
   const sej = d.sejarah;
   const sejarah = '<section class="panel"><div class="panel-head"><h3>Sejarah ambilan</h3><span>'+sej.length+' rekod terkini</span></div><ul class="list">'+
-    (sej.length ? sej.map(a => '<li class="row"><div class="row-main"><div class="row-t">'+esc(a.barang || 'Ambilan')+'</div><div class="row-m"><span>'+esc(masa(a.masa))+'</span>'+(a.id ? '<span class="mono-s">'+esc(a.id)+'</span>' : '')+'</div></div><div class="row-side"><span class="pill st-'+a.sumber.toLowerCase()+'">'+(a.sumber === 'Borang' ? 'Google Form' : 'Sistem')+'</span></div></li>').join('')
+    (sej.length ? sej.map(a => '<li class="row"><div class="row-main"><div class="row-t">'+esc(a.barang || 'Ambilan')+'</div><div class="row-m"><span>'+esc(masa(a.masa))+'</span>'+(a.id ? '<span class="mono-s">'+esc(a.id)+'</span>' : '')+'</div></div><div class="row-side"><span class="pill st-'+a.sumber.toLowerCase()+'">'+(a.sumber === 'Borang' ? 'Google Form' : 'Sistem')+'</span>'+statusSah(a, false)+(a.status === 'Menunggu' ? '<button class="btn" data-resit="'+esc(a.id)+'">Tunjuk resit</button>' : '')+'</div></li>').join('')
       : '<li class="empty">Belum ada ambilan.</li>')+'</ul></section>';
-  m.innerHTML = atas + status + barang + sejarah;
+  const hariIni = kunciDari(new Date());
+  const tunggu = sej.find(a => a.status === 'Menunggu' && kunciDari(new Date(a.masa)) === hariIni);
+  const sahNotis = tunggu ? '<div class="banner banner-row"><span><b>Tunjukkan resit kepada petugas JPP</b> di kiosk untuk pengesahan ambilan anda.</span><button class="btn" data-resit="'+esc(tunggu.id)+'">Tunjuk resit</button></div>' : '';
+  m.innerHTML = atas + sahNotis + status + barang + sejarah;
   kemasCart();
 }
 
@@ -992,6 +1107,13 @@ function ubahPick(pick, stok, had, id, delta){
   if (n <= 0) delete pick[id]; else pick[id] = n;
 }
 $('#main').addEventListener('click', e => {
+  const rs = e.target.closest('[data-resit]');
+  if (rs && S.mode === 'pelajar') {
+    const a = (S.d.sejarah || []).find(x => x.id === rs.dataset.resit);
+    if (a) tunjukResit({ id: a.id, masa: a.masa, nama: a.nama || (S.d.saya.profil || {}).nama, matriks: a.matriks || (S.d.saya.profil || {}).matriks,
+      barang: pecahBarang(a.barang).map(b => b.qty + ' × ' + b.nama), jumlah: a.jumlah, status: a.status }, false);
+    return;
+  }
   const b = e.target.closest('[data-step]');
   if (b && S.mode === 'pelajar') {
     ubahPick(S.pick, S.d.stok, S.d.kelayakan.hadItem, b.dataset.id, Number(b.dataset.step));
@@ -1045,6 +1167,7 @@ function tunjukResit(r, bagiPihak){
     '<h2>Ambilan direkod</h2><div class="who">'+esc(r.nama)+'</div><div class="when">'+esc(r.matriks)+' · '+esc(masa(r.masa))+'</div>'+
     '<ul class="sum">'+r.barang.map(t => { const p = t.split(' × '); return '<li><span>'+esc(p[1])+'</span><b>'+esc(p[0])+'</b></li>'; }).join('')+'<li><span><strong>Jumlah</strong></span><b>'+r.jumlah+' item</b></li></ul>'+
     '<div class="hint mono-s" style="font-size:14px">ID '+esc(r.id)+'</div>'+
+    (bagiPihak || r.status === 'Diambil' ? '<span class="resit-st st-sah">✓ Disahkan oleh petugas</span>' : '<span class="resit-st st-menunggu">Menunggu pengesahan petugas</span>')+
     (bagiPihak || !(S.d.awam && S.d.awam.mesejResit) ? '' : '<div class="note">'+esc(S.d.awam.mesejResit)+'</div>')+
     '</div><div class="dlg-foot"><div class="right"><button class="btn primary" data-close>Selesai</button></div></div>');
 }
@@ -1072,7 +1195,7 @@ function renderProfil(){
 }
 
 /* ---------------- STAF ---------------- */
-const TABS = [['ringkasan','Ringkasan'],['stok','Stok'],['ambilan','Ambilan'],['pelajar','Pelajar'],['log','Log stok'],['tetapan','Tetapan']];
+const TABS = [['ringkasan','Ringkasan'],['laporan','Laporan'],['stok','Stok'],['kiraan','Kiraan stok'],['ambilan','Ambilan'],['pelajar','Pelajar'],['suhu','Suhu'],['stafmeal','Staf meal'],['log','Log stok'],['tetapan','Tetapan']];
 function statusItem(i){ if (i.stok == null) return 'baru'; if (i.stok <= 0) return 'habis'; if (i.stok <= i.min) return 'rendah'; return 'cukup'; }
 const ST_LABEL = { cukup:'Cukup', rendah:'Rendah', habis:'Habis', baru:'Belum dikira' };
 function luputHampir(i){ if (!i.luput || !(i.stok > 0)) return false; return bezaHari(i.luput) <= 30; }
@@ -1080,13 +1203,17 @@ function luputHampir(i){ if (!i.luput || !(i.stok > 0)) return false; return bez
 function renderStaf(){
   $('#cartbar').hidden = true;
   const u = S.d.urus;
-  const tabs = '<div class="tabs" role="tablist">'+TABS.map(t => '<button class="tab" role="tab" data-tab="'+t[0]+'" aria-selected="'+(S.tab === t[0])+'">'+t[1]+'</button>').join('')+'</div>';
+  const tabs = '<div class="tabs" role="tablist">'+TABS.map(t => '<button class="tab" role="tab" data-tab="'+t[0]+'" aria-selected="'+(S.tab === t[0])+'">'+t[1]+(t[0] === 'ambilan' && u.menunggu ? ' <span class="pill st-menunggu" style="padding:1px 7px">'+u.menunggu+'</span>' : '')+'</button>').join('')+'</div>';
   let body = '';
   if (S.tab === 'ringkasan') body = stafRingkasan(u);
   else if (S.tab === 'stok') body = stafStok();
   else if (S.tab === 'ambilan') body = stafAmbilan(u);
   else if (S.tab === 'pelajar') body = stafPelajar(u);
   else if (S.tab === 'tetapan') body = stafTetapan();
+  else if (S.tab === 'kiraan') body = stafKiraan(u);
+  else if (S.tab === 'laporan') body = stafLaporan(u);
+  else if (S.tab === 'suhu') body = stafSuhu(u);
+  else if (S.tab === 'stafmeal') body = stafMeal(u);
   else body = stafLog(u);
   const fokus = document.activeElement && document.activeElement.id;
   const pos = document.activeElement && document.activeElement.selectionStart;
@@ -1100,7 +1227,10 @@ function stafRingkasan(u){
   const luput = st.filter(luputHampir).length;
   const perhatian = st.filter(i => ['habis','rendah','baru'].indexOf(statusItem(i)) >= 0 || luputHampir(i))
     .sort((a,b) => ({habis:0,rendah:1,baru:3,cukup:2}[statusItem(a)]) - ({habis:0,rendah:1,baru:3,cukup:2}[statusItem(b)]));
-  return '<section class="tiles">'+
+  const tunggu = u.menungguHariIni ? '<div class="banner banner-row"><span><b>'+u.menungguHariIni+' ambilan hari ini</b> belum disahkan di kiosk. Semak barang pelajar sama seperti resit.</span><button class="btn" data-goto="ambilan" data-src-goto="Menunggu">Semak sekarang</button></div>' : '';
+  const su = (u.suhu && u.suhu.sesi) || [];
+  const ingat = su.filter(x => x.perluBuka || x.perluTutup).map(x => '<div class="banner banner-row"><span><b>Rekod suhu '+(x.perluBuka ? 'buka' : 'tutup')+'</b> untuk sesi '+esc(x.label)+' belum dibuat.</span><button class="btn" data-goto="suhu">Rekod sekarang</button></div>').join('');
+  return ingat + tunggu + '<section class="tiles">'+
     '<div class="tile"><span class="n">'+r.ambilanHariIni+'</span><span class="l">Ambilan hari ini</span></div>'+
     '<div class="tile"><span class="n">'+r.itemKeluarHariIni+'</span><span class="l">Item keluar hari ini</span></div>'+
     '<button class="tile crit" data-goto="stok" data-st="perhatian"><span class="n">'+(habis + rendah)+'</span><span class="l">Habis / stok rendah</span></button>'+
@@ -1139,26 +1269,509 @@ function stafStok(){
     '<section class="panel"><div class="panel-head"><span><strong style="color:var(--ink)">'+list.length+'</strong> daripada '+S.d.stok.length+' item</span><span>Jumlah unit: <strong style="color:var(--ink)">'+unit+'</strong></span></div><ul class="list">'+
     (list.length ? list.map(i => {
       const st = statusItem(i);
-      const meta = [esc(i.kategori), i.lokasi ? '<span class="shelf">'+esc(i.lokasi)+'</span>' : '', infoLuput(i)].filter(Boolean).map(x => x.startsWith('<') ? x : '<span>'+x+'</span>').join('');
+      const meta = [esc(i.kategori), i.lokasi ? '<span class="shelf">'+esc(i.lokasi)+'</span>' : '', i.kotak ? '<span><b>Rak '+Math.max(0, (i.stok || 0) - i.kotak)+' · Kotak '+i.kotak+'</b></span>' : '', infoLuput(i)].filter(Boolean).map(x => x.startsWith('<') ? x : '<span>'+x+'</span>').join('');
       return '<li class="item"><div class="row-main"><div class="row-t">'+esc(i.nama)+'</div><div class="row-m">'+meta+'</div></div>'+
-        '<div class="qty" style="text-align:right">'+(i.stok == null ? '–' : i.stok)+'<br><small>'+esc(i.unit)+' · min '+i.min+'</small></div>'+
+        '<div class="qty" style="text-align:right">'+(i.stok == null ? '–' : i.stok)+'<br><small>'+esc(i.unit)+' · min '+i.min+'</small>'+'</div>'+
         '<span class="pill st-'+st+'">'+ST_LABEL[st]+'</span>'+
-        '<div class="acts"><button class="btn in" data-act="Masuk" data-id="'+esc(i.id)+'">+ Masuk</button><button class="btn out" data-act="Keluar" data-id="'+esc(i.id)+'" '+(i.stok > 0 ? '' : 'disabled')+'>− Keluar</button><button class="btn" data-act="Kiraan" data-id="'+esc(i.id)+'">Kira</button><button class="btn" data-act="edit" data-id="'+esc(i.id)+'">Edit</button></div></li>';
+        '<div class="acts"><button class="btn in" data-act="Masuk" data-id="'+esc(i.id)+'">+ Masuk</button><button class="btn out" data-act="Keluar" data-id="'+esc(i.id)+'" '+(i.stok > 0 ? '' : 'disabled')+'>− Keluar</button>'+(i.kotak ? '<button class="btn" data-act="Pindah" data-id="'+esc(i.id)+'">Ke rak</button>' : '')+'<button class="btn" data-act="Kiraan" data-id="'+esc(i.id)+'">Kira</button><button class="btn" data-act="edit" data-id="'+esc(i.id)+'">Edit</button></div></li>';
     }).join('') : '<li class="empty"><strong>Tiada item sepadan</strong>Ubah carian atau penapis.</li>')+'</ul></section>';
 }
 
 function barisAmbilan(a){
   return '<li class="row"><div class="row-main"><div class="row-t">'+esc(a.nama || a.email)+(a.matriks ? ' <span class="mono-s" style="color:var(--muted);font-weight:600">'+esc(a.matriks)+'</span>' : '')+'</div>'+
     '<div class="row-m"><span>'+esc(a.barang || '—')+'</span></div><div class="row-m"><span>'+esc(masa(a.masa))+'</span>'+(a.sumber === 'Sistem' && a.oleh !== 'Sendiri' ? '<span>Direkod oleh '+esc(a.oleh)+'</span>' : '')+(a.ulasan ? '<span>“'+esc(a.ulasan)+'”</span>' : '')+'</div></div>'+
-    '<div class="row-side"><span class="qty">'+(a.jumlah || 0)+'</span><span class="pill st-'+a.sumber.toLowerCase()+'">'+(a.sumber === 'Borang' ? 'Google Form' : 'Sistem')+'</span></div></li>';
+    '<div class="row-side"><span class="qty">'+(a.jumlah || 0)+'</span><span class="pill st-'+a.sumber.toLowerCase()+'">'+(a.sumber === 'Borang' ? 'Google Form' : 'Sistem')+'</span>'+statusSah(a, true)+'</div></li>';
+}
+function statusSah(a, butang){
+  if (a.sumber !== 'Sistem') return '';
+  if (a.status === 'Menunggu') return butang ? '<button class="btn sah" data-sah="'+esc(a.id)+'">Sahkan</button>' : '<span class="pill st-menunggu">Belum disahkan</span>';
+  if (a.status === 'Diambil') return '<span class="pill st-sah" title="'+esc((a.sahOleh ? 'Oleh '+a.sahOleh : '')+(a.sahMasa ? ' · '+masa(a.sahMasa) : ''))+'">✓ Disahkan</span>';
+  return '';
+}
+function pecahBarang(t){ return String(t || '').split(/, (?=\d+ × )/).filter(Boolean).map(x => { const p = x.split(' × '); return { qty: p[0], nama: p.slice(1).join(' × ') }; }); }
+function bukaSahkanKiosk(a){
+  bukaDlg('<div class="dlg-head"><h2>Sahkan di kiosk</h2><p>'+esc(a.nama || a.email)+(a.matriks ? ' · '+esc(a.matriks) : '')+' · '+esc(masa(a.masa))+'</p></div><div class="dlg-body">'+
+    '<div class="banner">Semak barang di tangan pelajar <b>sama seperti senarai ini, termasuk perisa dan jenis</b>. Jika berbeza, minta pelajar tukar mengikut resit sebelum sahkan.</div>'+
+    '<ul class="sum">'+pecahBarang(a.barang).map(b => '<li><span>'+esc(b.nama)+'</span><b>'+esc(b.qty)+'</b></li>').join('')+'<li><span><strong>Jumlah dikira</strong></span><b>'+(a.jumlah || 0)+' item</b></li></ul>'+
+    '<div class="hint mono-s" style="font-size:14px">ID '+esc(a.id)+'</div><div class="err" id="errSahK"></div></div>'+
+    '<div class="dlg-foot"><div class="right"><button type="button" class="btn" data-close>Kembali</button><button type="button" class="btn sah" id="btnSahK">✓ Sudah diambil</button></div></div>');
+  $('#btnSahK').onclick = () => aksiStaf('sahkanAmbilan', [a.id], $('#btnSahK'), $('#errSahK'), 'Ambilan '+(a.nama || '')+' disahkan');
 }
 function stafAmbilan(u){
   const f = S.amb;
-  const list = u.ambilan.filter(a => (!f.src || a.sumber === f.src) && (!f.q || (a.nama+' '+a.matriks+' '+a.email+' '+a.barang).toLowerCase().indexOf(f.q.toLowerCase()) >= 0));
-  return '<div class="bar"><div class="field" style="flex:1;min-width:200px"><label for="aQ">Cari</label><input id="aQ" type="search" value="'+esc(f.q)+'" placeholder="Nama, no. matriks atau e-mel"></div>'+
-    '<div class="chips">'+[['','Semua'],['Sistem','Sistem'],['Borang','Google Form']].map(c => '<button class="chip" data-src="'+c[0]+'" aria-pressed="'+(f.src === c[0])+'">'+c[1]+'</button>').join('')+'</div></div>'+
+  const list = u.ambilan.filter(a => (!f.src || (f.src === 'Menunggu' ? a.status === 'Menunggu' : a.sumber === f.src)) && (!f.q || (a.nama+' '+a.matriks+' '+a.email+' '+a.barang+' '+a.id).toLowerCase().indexOf(f.q.toLowerCase()) >= 0));
+  return '<div class="bar"><div class="field" style="flex:1;min-width:200px"><label for="aQ">Cari</label><input id="aQ" type="search" value="'+esc(f.q)+'" placeholder="Nama, no. matriks, e-mel atau ID resit"></div>'+
+    '<div class="chips">'+[['','Semua'],['Menunggu','Belum disahkan ('+(u.menunggu || 0)+')'],['Sistem','Sistem'],['Borang','Google Form']].map(c => '<button class="chip" data-src="'+c[0]+'" aria-pressed="'+(f.src === c[0])+'">'+c[1]+'</button>').join('')+'</div></div>'+
     '<section class="panel"><div class="panel-head"><span>'+list.length+' rekod (300 terkini)</span></div><ul class="list">'+(list.length ? list.map(barisAmbilan).join('') : '<li class="empty">Tiada rekod sepadan.</li>')+'</ul></section>';
 }
+
+/* ---------- KIRAAN STOK PUKAL ---------- */
+function kunciDraf(){ return 'fbjpp_kiraan_' + ((S.d && S.d.saya && S.d.saya.email) || ''); }
+function mulaKiraan(){
+  S.kp = { rak:{}, kotak:{}, lihat:{}, lihatKotak:{}, nota:'Kiraan sebelum restock', q:'', cat:'', tapis:'', armed:false };
+  try { const d = JSON.parse(localStorage.getItem(kunciDraf()) || 'null'); if (d && (d.rak || d.kotak)) { S.kp.rak = d.rak || {}; S.kp.kotak = d.kotak || {}; S.kp.lihat = d.lihat || {}; S.kp.lihatKotak = d.lihatKotak || {}; S.kp.nota = d.nota || S.kp.nota; S.kp.draf = d.t; } } catch (e) {}
+}
+function simpanDraf(){
+  try {
+    if (Object.keys(S.kp.rak).length || Object.keys(S.kp.kotak).length) localStorage.setItem(kunciDraf(), JSON.stringify({ rak:S.kp.rak, kotak:S.kp.kotak, lihat:S.kp.lihat, lihatKotak:S.kp.lihatKotak, nota:S.kp.nota, t:Date.now() }));
+    else localStorage.removeItem(kunciDraf());
+  } catch (e) {}
+}
+function sistemKp(i){ const l = S.kp.lihat[i.id]; return l != null ? Number(l) : (i.stok || 0); }
+function sistemKotakKp(i){ const l = S.kp.lihatKotak[i.id]; return l != null ? Number(l) : (i.kotak || 0); }
+function fizikalKp(i){
+  const r = S.kp.rak[i.id], k = S.kp.kotak[i.id];
+  if ((r == null || r === '') && (k == null || k === '')) return null;
+  const rak = r == null || r === '' ? Math.max(0, sistemKp(i) - sistemKotakKp(i)) : Number(r);
+  const kot = k == null || k === '' ? sistemKotakKp(i) : Number(k);
+  return rak + kot;
+}
+function bezaKp(i){
+  const f = fizikalKp(i);
+  if (f == null) return { cls:'kosong', t:'–', n:null };
+  const b = f - sistemKp(i);
+  return b === 0 ? { cls:'tepat', t:'✓', n:0 } : { cls: b < 0 ? 'kurang' : 'lebih', t:(b > 0 ? '+' : '−') + Math.abs(b), n:b };
+}
+function senaraiKp(){
+  const cats = S.d.kategori;
+  return S.d.stok.slice().sort((a,b) => (cats.indexOf(a.kategori) - cats.indexOf(b.kategori)) || String(a.lokasi||'').localeCompare(String(b.lokasi||'')) || a.nama.localeCompare(b.nama));
+}
+function progKp(){
+  const L = S.d.stok, dikira = L.filter(i => bezaKp(i).n != null), beza = dikira.filter(i => bezaKp(i).n !== 0);
+  const kurang = beza.filter(i => bezaKp(i).n < 0).reduce((s,i) => s - bezaKp(i).n, 0), lebih = beza.filter(i => bezaKp(i).n > 0).reduce((s,i) => s + bezaKp(i).n, 0);
+  return '<span><b>'+dikira.length+'</b> / '+L.length+' item dikira</span><span><b>'+beza.length+'</b> berbeza</span><span><b style="color:var(--crit)">−'+kurang+'</b> kurang</span><span><b style="color:var(--blue)">+'+lebih+'</b> lebih</span>';
+}
+function netKat(kat){
+  const r = S.d.stok.filter(i => i.kategori === kat && bezaKp(i).n != null);
+  if (!r.length) return '';
+  const n = r.reduce((s,i) => s + bezaKp(i).n, 0), ada = r.some(i => bezaKp(i).n !== 0);
+  return r.length + ' dikira · ' + (n === 0 ? (ada ? 'jumlah sama, perisa/jenis bertukar' : 'tepat') : 'beza ' + (n > 0 ? '+' : '−') + Math.abs(n));
+}
+function stafKiraan(u){
+  if (!S.kp) mulaKiraan();
+  const K = S.kp, cats = S.d.kategori;
+  const q = K.q.toLowerCase();
+  const list = senaraiKp().filter(i => (!K.cat || i.kategori === K.cat) && (!q || (i.nama+' '+(i.lokasi||'')).toLowerCase().indexOf(q) >= 0) &&
+    (!K.tapis || (K.tapis === 'belum' ? bezaKp(i).n == null : bezaKp(i).n != null && bezaKp(i).n !== 0)));
+  let rows = '', kini = null;
+  list.forEach(i => {
+    if (i.kategori !== kini) { kini = i.kategori; rows += '<li class="kp-cat"><b>'+esc(kini)+'</b><span data-kpnet="'+esc(kini)+'">'+esc(netKat(kini))+'</span></li>'; }
+    const b = bezaKp(i), v = K.rak[i.id], vk = K.kotak[i.id], sk = sistemKotakKp(i);
+    rows += '<li class="kp-row'+(b.n != null ? ' dikira' : '')+'" data-kprow="'+esc(i.id)+'"><div class="row-main"><div class="row-t">'+esc(i.nama)+'</div><div class="row-m">'+(i.lokasi ? '<span class="shelf">'+esc(i.lokasi)+'</span>' : '')+'</div></div>'+
+      '<div class="kp-sis">Sistem <b>'+(i.stok == null && K.lihat[i.id] == null ? '–' : sistemKp(i))+'</b> '+esc(i.unit)+(sk ? '<br><span>rak '+Math.max(0, sistemKp(i) - sk)+' · kotak '+sk+'</span>' : '')+'</div>'+
+      '<div class="kp-in"><input id="kp-'+esc(i.id)+'" data-kp="'+esc(i.id)+'" data-kpj="rak" type="number" min="0" step="1" inputmode="numeric" enterkeyhint="next" placeholder="Rak" aria-label="Jumlah '+esc(i.nama)+' di rak atau chiller" value="'+esc(v == null ? '' : v)+'">'+
+      '<input id="kpk-'+esc(i.id)+'" data-kp="'+esc(i.id)+'" data-kpj="kotak" type="number" min="0" step="1" inputmode="numeric" enterkeyhint="next" placeholder="Kotak" aria-label="Jumlah '+esc(i.nama)+' dalam kotak atau stor" value="'+esc(vk == null ? '' : vk)+'"></div>'+
+      '<div class="kp-beza '+b.cls+'" data-kpb="'+esc(i.id)+'">'+b.t+'</div></li>';
+  });
+  const sej = u.kiraan || [];
+  return '<section class="panel"><div class="panel-head"><h3>Kiraan stok</h3><span>Semak rak dan chiller sebelum restock</span></div><div class="panel-body">'+
+    '<p style="margin:0;color:var(--muted);font-size:14px">Kira barang sebenar dan isi jumlahnya dalam dua lajur: <b>Rak</b> (dipamerkan di rak/chiller) dan <b>Kotak</b> (belum dikeluarkan dari kotak/stor). Jika satu lajur dibiarkan kosong, angka sistem untuk lokasi itu digunakan. Biarkan kedua-duanya kosong untuk item yang tidak dikira. Beza dipaparkan serta-merta, dan stok sistem dikemas kini apabila anda tekan <b>Simpan kiraan</b>. Jika ada ambilan berlaku semasa anda mengira, sistem akan mengambil kiranya secara automatik.</p>'+
+    (K.draf ? '<div class="banner">Draf kiraan dari '+esc(masa(new Date(K.draf).toISOString()))+' dipulihkan dari peranti ini.</div>' : '')+
+    '<div class="kp-head"><div class="kp-prog" id="kpProg">'+progKp()+'</div></div>'+
+    '<div class="toolbar"><div class="field search"><label for="kpQ">Cari</label><input id="kpQ" type="search" value="'+esc(K.q)+'" placeholder="Nama item atau lokasi"></div>'+
+    '<div class="field"><label for="kpKat">Kategori</label><select id="kpKat"><option value="">Semua</option>'+cats.map(c => '<option'+(c === K.cat ? ' selected' : '')+'>'+esc(c)+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label for="kpTapis">Papar</label><select id="kpTapis">'+[['','Semua item'],['belum','Belum dikira'],['beza','Berbeza sahaja']].map(o => '<option value="'+o[0]+'"'+(o[0] === K.tapis ? ' selected' : '')+'>'+o[1]+'</option>').join('')+'</select></div></div>'+
+    '</div><ul class="list">'+(rows || '<li class="empty"><strong>Tiada item sepadan</strong>Ubah carian atau penapis.</li>')+'</ul></section>'+
+    '<div class="kp-foot"><div class="field"><label for="kpNota">Catatan kiraan</label><input id="kpNota" maxlength="200" value="'+esc(K.nota)+'"></div>'+
+    '<button type="button" class="btn'+(K.armed ? ' danger' : '')+'" data-kpa="kosong">'+(K.armed ? 'Tekan lagi untuk kosongkan' : 'Kosongkan')+'</button>'+
+    '<button type="button" class="btn primary" data-kpa="simpan">Simpan kiraan</button><div class="err" id="errKp" style="flex-basis:100%"></div></div>'+
+    '<section class="panel"><div class="panel-head"><h3>Laporan kiraan</h3><span>'+sej.length+' sesi terkini · juga dalam tab "Kiraan Stok" di Google Sheet</span></div><ul class="list">'+
+    (sej.length ? sej.map(L => { const bz = L.baris.filter(r => r.beza !== 0); return '<li class="row"><div class="row-main"><div class="row-t">'+esc(masa(L.masa))+'</div><div class="row-m"><span>'+esc(L.catatan)+'</span><span>'+esc(L.oleh)+'</span></div></div>'+
+      '<div class="row-side"><span class="pill '+(bz.length ? 'st-rendah' : 'st-cukup')+'">'+L.baris.length+' dikira · '+bz.length+' berbeza</span><button class="btn" data-lap="'+esc(L.id)+'">Lihat</button></div></li>'; }).join('')
+      : '<li class="empty"><strong>Belum ada laporan</strong>Laporan beza rak dan sistem disimpan setiap kali anda simpan kiraan.</li>')+'</ul></section>';
+}
+function kemasKiraan(el){
+  const id = el.dataset.kp, i = S.d.stok.find(x => x.id === id); if (!i) return;
+  const v = el.value.trim(), tmp = el.dataset.kpj === 'kotak' ? S.kp.kotak : S.kp.rak;
+  if (v === '' || isNaN(Number(v))) delete tmp[id];
+  else tmp[id] = String(Math.max(0, Math.floor(Number(v))));
+  if (S.kp.rak[id] == null && S.kp.kotak[id] == null) { delete S.kp.lihat[id]; delete S.kp.lihatKotak[id]; }
+  else if (S.kp.lihat[id] == null) { S.kp.lihat[id] = i.stok || 0; S.kp.lihatKotak[id] = i.kotak || 0; }
+  const b = bezaKp(i), cell = document.querySelector('[data-kpb="'+id+'"]');
+  if (cell) { cell.className = 'kp-beza ' + b.cls; cell.textContent = b.t; }
+  const row = document.querySelector('[data-kprow="'+id+'"]'); if (row) row.classList.toggle('dikira', b.n != null);
+  document.querySelectorAll('[data-kpnet]').forEach(x => { if (x.dataset.kpnet === i.kategori) x.textContent = netKat(i.kategori); });
+  const p = $('#kpProg'); if (p) p.innerHTML = progKp();
+  S.kp.armed = false;
+  simpanDraf();
+}
+async function aksiKiraan(b){
+  const K = S.kp;
+  if (b.dataset.kpa === 'kosong') {
+    if (!K.armed) { K.armed = true; render(); setTimeout(() => { if (S.kp && S.kp.armed) { S.kp.armed = false; if (S.tab === 'kiraan') render(); } }, 4000); return; }
+    K.rak = {}; K.kotak = {}; K.lihat = {}; K.lihatKotak = {}; K.armed = false; K.draf = null; simpanDraf(); render(); toast('Kiraan dikosongkan'); return;
+  }
+  if (b.dataset.kpa === 'simpan') {
+    const ids = [...new Set(Object.keys(K.rak).concat(Object.keys(K.kotak)))].filter(id => S.d.stok.some(i => i.id === id));
+    const senarai = ids.map(id => ({ id, rak: K.rak[id] == null ? '' : Number(K.rak[id]), kotak: K.kotak[id] == null ? '' : Number(K.kotak[id]), dilihat: K.lihat[id], dilihatKotak: K.lihatKotak[id] }));
+    const err = $('#errKp');
+    if (!senarai.length) { err.textContent = 'Isi jumlah di rak atau dalam kotak untuk sekurang-kurangnya satu item.'; return; }
+    b.disabled = true; b.textContent = 'Menyimpan…'; err.textContent = '';
+    try {
+      const r = await api('kiraanPukal', S.token, senarai, ($('#kpNota') || {}).value || K.nota);
+      S.d = r.data; K.rak = {}; K.kotak = {}; K.lihat = {}; K.lihatKotak = {}; K.draf = null; K.nota = 'Kiraan sebelum restock'; simpanDraf();
+      render(); bukaLaporan(r.laporan, true);
+    } catch (e) {
+      if (sesiTamat(e)) return logKeluar();
+      err.textContent = mesejRalat(e); b.disabled = false; b.textContent = 'Simpan kiraan';
+    }
+  }
+}
+function bukaLaporan(L, baru){
+  const R = L.baris, beza = R.filter(r => r.beza !== 0);
+  const kurang = beza.filter(r => r.beza < 0), lebih = beza.filter(r => r.beza > 0);
+  const kats = [];
+  beza.forEach(r => { if (kats.indexOf(r.kategori) < 0) kats.push(r.kategori); });
+  const blok = kats.map(k => {
+    const semua = R.filter(r => r.kategori === k), bz = beza.filter(r => r.kategori === k);
+    const net = semua.reduce((s, r) => s + r.beza, 0);
+    return '<div class="lap-cat"><h4><span>'+esc(k)+'</span><span style="color:'+(net < 0 ? 'var(--crit)' : net > 0 ? 'var(--blue)' : 'var(--ok)')+'">'+(net === 0 ? 'jumlah sama' : 'beza '+(net > 0 ? '+' : '−')+Math.abs(net))+'</span></h4>'+
+      (net === 0 && bz.length > 1 ? '<div class="lap-tukar">Jumlah kategori ini sama tetapi perisa/jenis berbeza. Kemungkinan pelajar mengambil perisa lain daripada yang dipilih dalam sistem.</div>' : '')+
+      '<ul>'+bz.map(r => '<li><span>'+esc(r.nama)+'</span><span style="color:var(--muted)">sistem '+r.sistem+' → dikira '+(r.fizikal != null ? r.fizikal : r.rak)+(r.rak != null && r.kotak != null ? ' (rak '+r.rak+' + kotak '+r.kotak+')' : r.kotak != null ? ' (kotak '+r.kotak+')' : '')+'</span><b class="kp-beza '+(r.beza < 0 ? 'kurang' : 'lebih')+'" style="padding:2px 8px">'+(r.beza > 0 ? '+' : '−')+Math.abs(r.beza)+'</b></li>').join('')+'</ul></div>';
+  }).join('');
+  bukaDlg('<div class="dlg-head"><h2>'+(baru ? 'Kiraan disimpan' : 'Laporan kiraan')+'</h2><p>'+esc(masa(L.masa))+' · '+esc(L.oleh)+(L.catatan ? ' · '+esc(L.catatan) : '')+'</p></div><div class="dlg-body">'+
+    '<div class="lap-tiles"><div><b>'+R.length+'</b><span>item dikira</span></div><div><b style="color:var(--ok)">'+(R.length - beza.length)+'</b><span>tepat</span></div>'+
+    '<div><b style="color:var(--crit)">'+kurang.length+'</b><span>kurang (−'+kurang.reduce((s,r) => s - r.beza, 0)+' unit)</span></div><div><b style="color:var(--blue)">'+lebih.length+'</b><span>lebih (+'+lebih.reduce((s,r) => s + r.beza, 0)+' unit)</span></div></div>'+
+    (beza.length ? blok : '<div class="banner ok">Semua item yang dikira sama dengan sistem.</div>')+
+    (baru ? '<div class="hint">Stok sistem sudah dikemas kini mengikut kiraan. Sekarang anda boleh restock dan rekod "+ Masuk" untuk barang baharu.</div>' : '')+
+    '</div><div class="dlg-foot"><div class="right"><button type="button" class="btn primary" data-close>Selesai</button></div></div>');
+}
+
+/* ---------- STAF MEAL ---------- */
+function kiraMeal(pick){ return Object.values(kiraanKat(pick, S.d.stok)).reduce((a, b) => a + b, 0); }
+function stafMeal(u){
+  if (!S.meal) S.meal = { pick:{}, nota:'' };
+  const M = u.stafMeal || { had:0, digunakan:0, baki:0, sejarah:[] }, P = S.meal.pick, dipilih = kiraMeal(P), baki = M.baki - dipilih;
+  const head = '<section class="panel"><div class="panel-head"><h3>Staf meal</h3><span>Untuk staf JPP · had '+M.had+' item sehari</span></div><div class="panel-body">'+
+    '<div class="meal-head"><div><div class="tlbl">Baki anda hari ini: '+M.baki+' / '+M.had+' item</div><div class="hint">Kiraan sama seperti pelajar (cth: 2 paket Maggi = 1 item). Stok ditolak dan direkod sebagai "Staf meal".</div></div>'+
+    '<div class="meter" role="img" aria-label="'+M.digunakan+' daripada '+M.had+' item digunakan"><i style="width:'+(M.had ? Math.min(100, (M.digunakan + dipilih) / M.had * 100) : 0)+'%"></i></div></div></div></section>';
+  if (!M.had) return head + '<div class="banner">Staf meal tidak dibenarkan. Tetapkan had dalam Tetapan → Staf meal &amp; suhu.</div>' + mealSejarah(M);
+  const stok = senaraiKp().filter(i => (i.stok || 0) > 0);
+  let rows = '', kini = null;
+  stok.forEach(i => {
+    if (i.kategori !== kini) { kini = i.kategori; rows += '<li class="kp-cat"><b>'+esc(kini)+'</b></li>'; }
+    const q = P[i.id] || 0, cuba = Object.assign({}, P, { [i.id]: q + 1 });
+    const boleh = q < (i.stok || 0) && kiraMeal(cuba) <= M.baki;
+    rows += '<li class="sm-row"><div class="row-main"><div class="row-t">'+esc(i.nama)+'</div><div class="row-m"><span>Tinggal '+i.stok+' '+esc(i.unit)+'</span>'+(dikiraBarang(i) > 1 ? '<span><b>'+dikiraBarang(i)+' '+esc(i.unit)+' = 1 item</b></span>' : '')+'</div></div>'+
+      '<div class="step"><button type="button" data-sm="kurang" data-id="'+esc(i.id)+'" aria-label="Kurang '+esc(i.nama)+'"'+(q ? '' : ' disabled')+'>−</button><output>'+q+'</output>'+
+      '<button type="button" data-sm="tambah" data-id="'+esc(i.id)+'" aria-label="Tambah '+esc(i.nama)+'"'+(boleh ? '' : ' disabled')+'>+</button></div></li>';
+  });
+  const pilih = '<section class="panel"><div class="panel-head"><h3>Pilih barang</h3><span>'+dipilih+' item dipilih · baki selepas ini '+Math.max(0, baki)+'</span></div><ul class="list">'+
+    (M.baki > 0 ? rows || '<li class="empty">Tiada barang tersedia.</li>' : '<li class="empty"><strong>Had hari ini sudah dicapai</strong>Anda boleh ambil semula esok.</li>')+'</ul></section>'+
+    (M.baki > 0 ? '<div class="kp-foot"><div class="field"><label for="smNota">Catatan (pilihan)</label><input id="smNota" maxlength="200" placeholder="Contoh: Bertugas syif malam" value="'+esc(S.meal.nota)+'"></div>'+
+      '<button type="button" class="btn" data-sm="kosong"'+(dipilih ? '' : ' disabled')+'>Kosongkan</button><button type="button" class="btn primary" data-sm="simpan"'+(dipilih ? '' : ' disabled')+'>Rekod staf meal ('+dipilih+' item)</button><div class="err" id="errSm" style="flex-basis:100%"></div></div>' : '');
+  return head + pilih + mealSejarah(M);
+}
+function mealSejarah(M){
+  return '<section class="panel"><div class="panel-head"><h3>Rekod staf meal</h3><span>'+M.sejarah.length+' terkini · semua staf</span></div><ul class="list">'+
+    (M.sejarah.length ? M.sejarah.map(a => '<li class="row"><div class="row-main"><div class="row-t">'+esc(a.nama || a.email)+'</div><div class="row-m"><span>'+esc(a.barang)+'</span></div><div class="row-m"><span>'+esc(masa(a.masa))+'</span>'+(a.catatan ? '<span>“'+esc(a.catatan)+'”</span>' : '')+'</div></div><div class="row-side"><span class="qty">'+a.jumlah+'</span><small>item</small></div></li>').join('')
+      : '<li class="empty">Belum ada rekod staf meal.</li>')+'</ul></section>';
+}
+async function aksiMeal(b){
+  const M = S.meal, k = b.dataset.sm, id = b.dataset.id;
+  if (k === 'tambah') { M.pick[id] = (M.pick[id] || 0) + 1; render(); return; }
+  if (k === 'kurang') { M.pick[id] = Math.max(0, (M.pick[id] || 0) - 1); if (!M.pick[id]) delete M.pick[id]; render(); return; }
+  if (k === 'kosong') { M.pick = {}; render(); return; }
+  if (k === 'simpan') {
+    const pilihan = Object.keys(M.pick).map(i => ({ id: i, qty: M.pick[i] }));
+    if (!pilihan.length) return;
+    b.disabled = true; b.textContent = 'Merekod…';
+    try {
+      const r = await api('ambilStaf', S.token, pilihan, M.nota);
+      S.d = r.data; S.meal = { pick:{}, nota:'' }; render();
+      toast('Staf meal direkod: ' + r.resit.jumlah + ' item · baki hari ini ' + r.resit.baki);
+    } catch (e) {
+      if (sesiTamat(e)) return logKeluar();
+      const er = $('#errSm'); if (er) er.textContent = mesejRalat(e); b.disabled = false; b.textContent = 'Rekod staf meal';
+    }
+  }
+}
+
+/* ---------- SUHU CHILLER & AIRCOND ---------- */
+function mulaSuhu(u){
+  const su = u.suhu;
+  const tutup = su.sesi.some(x => x.perluTutup) && !su.sesi.some(x => x.perluBuka);
+  S.suhu = { jenis: tutup ? 'Tutup' : 'Buka', chiller:'', aircond:'', semak:{}, catatan:'' };
+}
+function luarJulat(v, j){ if (v === '' || v == null || isNaN(Number(v))) return false; const n = Number(v); return n < j[0] || n > j[1]; }
+function stafSuhu(u){
+  const su = u.suhu; if (!su) return '<div class="banner">Muat semula halaman.</div>';
+  if (!S.suhu) mulaSuhu(u);
+  const F = S.suhu, senarai = F.jenis === 'Tutup' ? su.semakTutup : su.semakBuka, jc = su.julat.chiller, ja = su.julat.aircond;
+  const fmt = r => r ? '✓ '+esc(masa(r.masa).replace('Hari ini, ', ''))+' · chiller '+r.chiller+'°C'+(r.aircond != null ? ' · aircond '+r.aircond+'°C' : '') : '';
+  const kad = su.sesi.length ? '<div class="sesi-k">'+su.sesi.map(x => '<div class="sesi-c"><h4>Sesi '+esc(x.label)+'</h4>'+
+    '<div class="ln"><span>Buka</span>'+(x.buka ? '<span class="pill '+(x.buka.status === 'OK' ? 'st-sah' : 'st-luar')+'">'+fmt(x.buka)+'</span>' : '<span class="pill '+(x.perluBuka ? 'st-menunggu' : 'st-baru')+'">'+(x.perluBuka ? '! Perlu direkod' : 'Belum')+'</span>')+'</div>'+
+    '<div class="ln"><span>Tutup</span>'+(x.tutup ? '<span class="pill '+(x.tutup.status === 'OK' ? 'st-sah' : 'st-luar')+'">'+fmt(x.tutup)+'</span>' : '<span class="pill '+(x.perluTutup ? 'st-menunggu' : 'st-baru')+'">'+(x.perluTutup ? '! Perlu direkod' : 'Belum')+'</span>')+'</div></div>').join('')+'</div>' : '';
+  const siapSemua = senarai.every((x, i) => F.semak[i]);
+  const perluNota = luarJulat(F.chiller, jc) || luarJulat(F.aircond, ja) || !siapSemua;
+  const borang = '<section class="panel"><div class="panel-head"><h3>Rekod suhu</h3><span>Setiap kali buka dan tutup kiosk</span></div><div class="panel-body">'+
+    '<div class="seg" role="group" aria-label="Jenis rekod"><button type="button" data-sa="jenis" data-v="Buka" aria-pressed="'+(F.jenis === 'Buka')+'">Buka kiosk</button><button type="button" data-sa="jenis" data-v="Tutup" aria-pressed="'+(F.jenis === 'Tutup')+'">Tutup kiosk</button></div>'+
+    '<div class="suhu-in"><div class="field"><label for="suC">Suhu chiller (°C)</label><input id="suC" type="number" step="0.1" inputmode="decimal" placeholder="cth: 3" value="'+esc(F.chiller)+'"><span class="julat'+(luarJulat(F.chiller, jc) ? ' luar' : '')+'" id="suCJ">Julat selamat '+jc[0]+'–'+jc[1]+'°C'+(luarJulat(F.chiller, jc) ? ' · LUAR JULAT' : '')+'</span></div>'+
+    '<div class="field"><label for="suA">Suhu aircond (°C)'+(F.jenis === 'Tutup' ? ' – kosongkan jika sudah dimatikan' : '')+'</label><input id="suA" type="number" step="0.5" inputmode="decimal" placeholder="cth: 25" value="'+esc(F.aircond)+'"><span class="julat'+(luarJulat(F.aircond, ja) ? ' luar' : '')+'" id="suAJ">Tetapan jimat tenaga '+ja[0]+'–'+ja[1]+'°C'+(luarJulat(F.aircond, ja) ? ' · LUAR JULAT' : '')+'</span></div></div>'+
+    '<div class="tgrp"><div class="tlbl">Senarai semak prosedur '+(F.jenis === 'Tutup' ? 'tutup' : 'buka')+'</div><div class="semak">'+
+    (senarai.length ? senarai.map((x, i) => '<label><input type="checkbox" data-sus="'+i+'"'+(F.semak[i] ? ' checked' : '')+'><span>'+esc(x)+'</span></label>').join('') : '<div class="hint">Tiada senarai semak. Tambah dalam Tetapan → Staf meal &amp; suhu.</div>')+'</div></div>'+
+    '<div class="field"><label for="suNota">Catatan / tindakan'+(perluNota ? ' <span style="color:var(--crit)">(wajib)</span>' : ' (pilihan)')+'</label><input id="suNota" maxlength="300" placeholder="Contoh: Pintu chiller tidak rapat, sudah dibetulkan" value="'+esc(F.catatan)+'"></div>'+
+    '<div class="err" id="errSu"></div><div class="tfoot"><span class="hint">Direkod oleh '+esc(S.d.saya.namaStaf || S.d.saya.email)+'</span><button type="button" class="btn primary" data-sa="simpan">Simpan rekod '+(F.jenis === 'Tutup' ? 'tutup' : 'buka')+'</button></div></div></section>';
+  const sej = su.sejarah;
+  const senaraiSej = '<section class="panel"><div class="panel-head"><h3>Rekod terdahulu</h3><span>Juga dalam tab "Suhu" di Google Sheet · carta dalam tab Laporan</span></div><ul class="list">'+
+    (sej.length ? sej.slice(0, 20).map(r => '<li class="row"><div class="row-main"><div class="row-t">'+esc(r.jenis)+(r.sesi ? ' · sesi '+esc(r.sesi) : '')+'</div><div class="row-m"><span>Chiller <b>'+(r.chiller == null ? '–' : r.chiller+'°C')+'</b></span><span>Aircond <b>'+(r.aircond == null ? 'dimatikan' : r.aircond+'°C')+'</b></span><span>Semakan '+esc(r.semak.split(' · ')[0])+'</span></div>'+
+      '<div class="row-m"><span>'+esc(masa(r.masa))+'</span><span>'+esc(r.oleh)+'</span>'+(r.catatan ? '<span>“'+esc(r.catatan)+'”</span>' : '')+'</div></div><div class="row-side"><span class="pill '+(r.status === 'OK' ? 'st-sah' : 'st-luar')+'">'+(r.status === 'OK' ? '✓ OK' : '! '+esc(r.status))+'</span></div></li>').join('')
+      : '<li class="empty"><strong>Belum ada rekod suhu</strong>Rekod pertama akan dipaparkan di sini.</li>')+'</ul></section>';
+  return kad + borang + senaraiSej;
+}
+function kemasSuhu(el){
+  const F = S.suhu, su = S.d.urus.suhu; if (!F) return false;
+  if (el.id === 'suC') F.chiller = el.value; else if (el.id === 'suA') F.aircond = el.value; else if (el.id === 'suNota') F.catatan = el.value;
+  else if (el.dataset.sus != null) F.semak[el.dataset.sus] = el.checked; else return false;
+  const jc = su.julat.chiller, ja = su.julat.aircond;
+  const c = $('#suCJ'), a = $('#suAJ');
+  if (c) { c.className = 'julat' + (luarJulat(F.chiller, jc) ? ' luar' : ''); c.textContent = 'Julat selamat ' + jc[0] + '–' + jc[1] + '°C' + (luarJulat(F.chiller, jc) ? ' · LUAR JULAT' : ''); }
+  if (a) { a.className = 'julat' + (luarJulat(F.aircond, ja) ? ' luar' : ''); a.textContent = 'Tetapan jimat tenaga ' + ja[0] + '–' + ja[1] + '°C' + (luarJulat(F.aircond, ja) ? ' · LUAR JULAT' : ''); }
+  return true;
+}
+async function aksiSuhu(b){
+  const F = S.suhu, su = S.d.urus.suhu;
+  if (b.dataset.sa === 'jenis') { F.jenis = b.dataset.v; F.semak = {}; render(); return; }
+  if (b.dataset.sa === 'simpan') {
+    const senarai = F.jenis === 'Tutup' ? su.semakTutup : su.semakBuka;
+    const err = $('#errSu'); err.textContent = '';
+    if (String(F.chiller).trim() === '') { err.textContent = 'Masukkan suhu chiller.'; return; }
+    if (F.jenis === 'Buka' && String(F.aircond).trim() === '') { err.textContent = 'Masukkan suhu aircond semasa buka kiosk.'; return; }
+    b.disabled = true; b.textContent = 'Menyimpan…';
+    try {
+      S.d = await api('rekodSuhu', S.token, { jenis: F.jenis, chiller: F.chiller, aircond: F.aircond, semak: senarai.filter((x, i) => F.semak[i]), catatan: F.catatan });
+      S.suhu = null; if (S.lap) S.lap.data = null; render(); toast('Rekod suhu ' + F.jenis.toLowerCase() + ' disimpan');
+    } catch (e) {
+      if (sesiTamat(e)) return logKeluar();
+      err.textContent = mesejRalat(e); b.disabled = false; b.textContent = 'Simpan rekod ' + F.jenis.toLowerCase();
+    }
+  }
+}
+
+/* ---------- LAPORAN & CARTA ---------- */
+function tambahHari(k, n){ const d = dariKunci(k); d.setDate(d.getDate() + n); return kunciDari(d); }
+function hariTempoh(L, n){ const out = []; for (let i = n - 1; i >= 0; i--) out.push(tambahHari(L.hariIni, -i)); return out; }
+function tarikhKecil(k){ const d = dariKunci(k); return d.getDate() + ' ' + BULAN[d.getMonth()]; }
+function lebarKad(lebar){
+  const m = Math.min(1200, (($('#main') || {}).clientWidth || 640));
+  const kad = lebar || window.innerWidth <= 760 ? m : (m - 12) / 2;
+  return Math.max(240, kad - 34);
+}
+async function muatLaporan(){
+  if (!S.lap) S.lap = { hari: 30, data: null, muat: false, err: '' };
+  if (S.lap.muat) return;
+  S.lap.muat = true; S.lap.err = '';
+  if (S.tab === 'laporan') render();
+  try { S.lap.data = await api('laporanData', S.token); }
+  catch (e) { if (sesiTamat(e)) return logKeluar(); S.lap.err = mesejRalat(e); }
+  S.lap.muat = false;
+  if (S.tab === 'laporan' && S.mode === 'staf') render();
+}
+function kadViz(tajuk, sub, isi, jadual, lebar){
+  return '<section class="vcard' + (lebar ? ' lebar' : '') + '"><h4>' + esc(tajuk) + '</h4>' + (sub ? '<p class="vsub">' + esc(sub) + '</p>' : '') + isi +
+    (jadual ? '<details><summary>Lihat jadual</summary>' + jadual + '</details>' : '') + '</section>';
+}
+function jadualHtml(kepala, baris){
+  return '<table><thead><tr>' + kepala.map((h, i) => '<th' + (i ? ' class="n"' : '') + '>' + esc(h) + '</th>').join('') + '</tr></thead><tbody>' +
+    baris.map(r => '<tr>' + r.map((c, i) => '<td' + (i ? ' class="n"' : '') + '>' + esc(c) + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
+}
+// Bar mendatar (HTML) — satu siri, satu warna; nilai di hujung bar
+function hbars(baris, warna, unit){
+  const max = Math.max(1, ...baris.map(r => r.n));
+  return '<div class="hbars">' + baris.map(r => '<div class="hb" tabindex="0" data-tip="' + esc(r.n + ' ' + unit + '\n' + r.nama + (r.ket ? '\n' + r.ket : '')) + '"><span class="nm">' + esc(r.nama) + '</span>' +
+    '<span class="tr"><span class="fl" style="width:' + (r.n / max * 100) + '%;background:' + (r.warna || warna) + '"></span>' + (r.tanda != null ? '<span class="tk" style="left:' + Math.min(100, r.tanda / max * 100) + '%"></span>' : '') + '</span><span class="vl">' + esc(r.label != null ? r.label : r.n) + '</span></div>').join('') + '</div>';
+}
+// Bar mencapah: − merah (rak kurang), + biru (rak lebih), titik tengah = tepat
+function dvbars(baris){
+  const max = Math.max(1, ...baris.map(r => Math.abs(r.n)));
+  return '<div class="hbars">' + baris.map(r => { const w = Math.abs(r.n) / max * 50;
+    return '<div class="hb dv" tabindex="0" data-tip="' + esc((r.n > 0 ? '+' : '') + r.n + ' unit\n' + r.nama + '\n' + r.ket) + '"><span class="nm">' + esc(r.nama) + '</span><span class="tr">' +
+      '<span class="fl' + (r.n < 0 ? ' neg' : '') + '" style="' + (r.n < 0 ? 'left:' + (50 - w) + '%' : 'left:50%') + ';width:' + w + '%;background:' + (r.n < 0 ? 'var(--s-crit)' : 'var(--c1)') + '"></span></span><span class="vl">' + (r.n > 0 ? '+' : r.n < 0 ? '−' : '') + Math.abs(r.n) + '</span></div>'; }).join('') + '</div>';
+}
+function donut(seg){
+  const jum = seg.reduce((s, x) => s + x.n, 0) || 1, R = 60, r = 38, cx = 70, cy = 70;
+  let a0 = -Math.PI / 2, laluan = '';
+  const gap = seg.length > 1 ? 0.035 : 0;
+  seg.forEach(x => {
+    const a1 = a0 + x.n / jum * Math.PI * 2;
+    const s0 = a0 + gap / 2, s1 = Math.max(s0 + 0.001, a1 - gap / 2), besar = s1 - s0 > Math.PI ? 1 : 0;
+    const p = (rad, a) => (cx + rad * Math.cos(a)).toFixed(2) + ' ' + (cy + rad * Math.sin(a)).toFixed(2);
+    const d = seg.length === 1 ? 'M' + p(R, 0) + ' A' + R + ' ' + R + ' 0 1 1 ' + p(R, Math.PI) + ' A' + R + ' ' + R + ' 0 1 1 ' + p(R, 0) + ' M' + p(r, 0) + ' A' + r + ' ' + r + ' 0 1 0 ' + p(r, Math.PI) + ' A' + r + ' ' + r + ' 0 1 0 ' + p(r, 0) + 'Z'
+      : 'M' + p(R, s0) + ' A' + R + ' ' + R + ' 0 ' + besar + ' 1 ' + p(R, s1) + ' L' + p(r, s1) + ' A' + r + ' ' + r + ' 0 ' + besar + ' 0 ' + p(r, s0) + 'Z';
+    laluan += '<path class="tip" tabindex="0" fill-rule="evenodd" d="' + d + '" fill="' + x.warna + '" data-tip="' + esc(x.n + ' unit · ' + Math.round(x.n / jum * 100) + '%\n' + x.nama) + '"></path>';
+    a0 = a1;
+  });
+  return '<svg class="svgc" viewBox="0 0 140 140" role="img" aria-label="Carta donut">' + laluan +
+    '<text x="70" y="68" text-anchor="middle" style="font-size:20px;font-weight:700;fill:var(--ink)">' + jum + '</text><text x="70" y="84" text-anchor="middle">unit</text></svg>';
+}
+// Lajur menegak (SVG) — satu atau dua siri bertindan; jarak 2px antara segmen
+function lajur(label, siri, opsyen){
+  const W = lebarKad(opsyen.lebar);
+  const H = 180, kiri = 30, bawah = 22, atas = 8, n = label.length;
+  const jum = label.map((_, i) => siri.reduce((s, x) => s + x.nilai[i], 0));
+  const maxRaw = Math.max(1, ...jum), langkah = maxRaw <= 5 ? 1 : Math.ceil(maxRaw / 4 / (maxRaw > 50 ? 10 : 1)) * (maxRaw > 50 ? 10 : 1), max = Math.ceil(maxRaw / langkah) * langkah;
+  const band = (W - kiri) / n, bw = Math.max(2, Math.min(24, band * 0.7));
+  const y = v => atas + (H - atas - bawah) * (1 - v / max);
+  let g = '';
+  for (let v = 0; v <= max; v += langkah) g += '<line x1="' + kiri + '" x2="' + W + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" stroke="' + (v ? 'var(--v-grid)' : 'var(--v-axis)') + '" stroke-width="1"></line><text x="' + (kiri - 6) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end">' + v + '</text>';
+  const tiap = Math.ceil(n / Math.max(1, Math.floor((W - kiri) / 46)));
+  label.forEach((l, i) => {
+    const x = kiri + band * i + (band - bw) / 2;
+    let asas = 0;
+    siri.forEach((sr, si) => {
+      const v = sr.nilai[i]; if (!v) return;
+      const y0 = y(asas), y1 = y(asas + v), atasSeg = siri.slice(si + 1).every(s2 => !s2.nilai[i]);
+      const h = Math.max(1, y0 - y1 - (asas ? 2 : 0));
+      const r = atasSeg ? Math.min(4, bw / 2, h) : 0;
+      const yt = y1, yb = yt + h;
+      g += '<path d="M' + x.toFixed(1) + ' ' + yb.toFixed(1) + ' V' + (yt + r).toFixed(1) + ' Q' + x.toFixed(1) + ' ' + yt.toFixed(1) + ' ' + (x + r).toFixed(1) + ' ' + yt.toFixed(1) + ' H' + (x + bw - r).toFixed(1) + ' Q' + (x + bw).toFixed(1) + ' ' + yt.toFixed(1) + ' ' + (x + bw).toFixed(1) + ' ' + (yt + r).toFixed(1) + ' V' + yb.toFixed(1) + 'Z" fill="' + sr.warna + '"></path>';
+      asas += v;
+    });
+    g += '<rect class="tip" tabindex="0" x="' + (kiri + band * i).toFixed(1) + '" y="' + atas + '" width="' + band.toFixed(1) + '" height="' + (H - atas - bawah) + '" fill="transparent" data-tip="' + esc((opsyen.tipLabel ? opsyen.tipLabel(i) : l) + '\n' + siri.map(sr => sr.nama + ': ' + sr.nilai[i]).join('\n') + (siri.length > 1 ? '\nJumlah: ' + jum[i] : '')) + '"></rect>';
+    if (i % tiap === 0) g += '<text x="' + (kiri + band * i + band / 2).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + esc(l) + '</text>';
+  });
+  return '<svg class="svgc" viewBox="0 0 ' + W.toFixed(0) + ' ' + H + '" role="img" aria-label="' + esc(opsyen.aria || 'Carta lajur') + '">' + g + '</svg>';
+}
+// Garis (SVG) dengan jalur julat selamat; titik di luar julat ditanda merah
+function garis(titik, julat, opsyen){
+  const W = lebarKad(false);
+  const H = 170, kiri = 30, bawah = 22, atas = 10;
+  const nilai = titik.map(p => p.v).concat(julat);
+  const lo = Math.floor(Math.min(...nilai) - 1), hi = Math.ceil(Math.max(...nilai) + 1);
+  const t0 = titik[0].t, t1 = titik[titik.length - 1].t, span = Math.max(1, t1 - t0);
+  const x = t => kiri + 6 + (W - kiri - 12) * ((t - t0) / span), y = v => atas + (H - atas - bawah) * (1 - (v - lo) / (hi - lo));
+  const langkah = Math.max(1, Math.round((hi - lo) / 4));
+  let g = '<rect x="' + kiri + '" width="' + (W - kiri) + '" y="' + y(julat[1]).toFixed(1) + '" height="' + (y(julat[0]) - y(julat[1])).toFixed(1) + '" fill="var(--v-band)"></rect>';
+  for (let v = lo; v <= hi; v += langkah) g += '<line x1="' + kiri + '" x2="' + W + '" y1="' + y(v).toFixed(1) + '" y2="' + y(v).toFixed(1) + '" stroke="var(--v-grid)"></line><text x="' + (kiri - 6) + '" y="' + (y(v) + 4).toFixed(1) + '" text-anchor="end">' + v + '</text>';
+  const tarikh = [...new Set(titik.map(p => p.k))], tiap = Math.ceil(tarikh.length / Math.max(1, Math.floor((W - kiri) / 60)));
+  tarikh.forEach((k, i) => { if (i % tiap) return; const p = titik.find(q => q.k === k); g += '<text x="' + x(p.t).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + esc(tarikhKecil(k)) + '</text>'; });
+  g += '<polyline fill="none" stroke="var(--c1)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="' + titik.map(p => x(p.t).toFixed(1) + ',' + y(p.v).toFixed(1)).join(' ') + '"></polyline>';
+  titik.forEach(p => {
+    const luar = p.v < julat[0] || p.v > julat[1];
+    g += '<circle cx="' + x(p.t).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="4" fill="' + (luar ? 'var(--s-crit)' : 'var(--c1)') + '" stroke="var(--surface)" stroke-width="2"></circle>' +
+      '<circle class="tip" tabindex="0" cx="' + x(p.t).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="12" fill="transparent" data-tip="' + esc(p.v + '°C' + (luar ? ' · luar julat' : '') + '\n' + p.label) + '"></circle>';
+  });
+  return '<svg class="svgc" viewBox="0 0 ' + W.toFixed(0) + ' ' + H + '" role="img" aria-label="' + esc(opsyen.aria) + '">' + g + '</svg>';
+}
+function stafLaporan(u){
+  if (!S.lap) S.lap = { hari: 30, data: null, muat: false, err: '' };
+  if (!S.lap.data && !S.lap.muat && !S.lap.err) setTimeout(muatLaporan, 0);
+  const T = S.lap, L = T.data;
+  const atas = '<div class="lap-bar"><div class="chips">' + [[7, '7 hari'], [30, '30 hari'], [90, '90 hari']].map(c => '<button class="chip" data-lhari="' + c[0] + '" aria-pressed="' + (T.hari === c[0]) + '">' + c[1] + '</button>').join('') + '</div>' +
+    '<button class="btn" data-lmuat="1"' + (T.muat ? ' disabled' : '') + '>' + (T.muat ? 'Memuat…' : 'Muat semula laporan') + '</button></div>';
+  if (T.err) return atas + '<div class="banner">' + esc(T.err) + '</div>';
+  if (!L) return atas + '<section class="panel"><div class="vkosong">Menyediakan laporan…</div></section>';
+  const hari = hariTempoh(L, T.hari), set = new Set(hari), mula = hari[0];
+  const amb = L.ambilan.filter(a => set.has(a[0]));
+  const ih = L.itemHari.filter(r => set.has(r[0])), sh = L.stafHari.filter(r => set.has(r[0]));
+  const unit = ih.reduce((s, r) => s + r[3], 0), unitStaf = sh.reduce((s, r) => s + r[3], 0);
+  const pelajar = new Set(amb.map(a => a[3])).size;
+  const tiles = '<section class="tiles">' +
+    '<div class="tile"><span class="n">' + amb.length + '</span><span class="l">Ambilan pelajar</span></div>' +
+    '<div class="tile"><span class="n">' + pelajar + '</span><span class="l">Pelajar berbeza</span></div>' +
+    '<div class="tile"><span class="n">' + unit + '</span><span class="l">Unit diambil pelajar</span></div>' +
+    '<div class="tile"><span class="n">' + unitStaf + '</span><span class="l">Unit staf meal</span></div></section>';
+
+  // 1. Item paling kerap diambil
+  const perItem = {}; ih.forEach(r => { perItem[r[1]] = (perItem[r[1]] || 0) + r[3]; });
+  const top = Object.keys(perItem).map(n => ({ nama: n, n: perItem[n] })).sort((a, b) => b.n - a.n);
+  const k1 = kadViz('Item paling kerap diambil', 'Unit diambil pelajar melalui sistem, 10 teratas', top.length ? hbars(top.slice(0, 10), 'var(--c1)', 'unit') : '<div class="vkosong">Belum ada ambilan dalam tempoh ini.</div>',
+    top.length ? jadualHtml(['Item', 'Unit'], top.map(r => [r.nama, r.n])) : '');
+
+  // 2. Kategori (donut, 5 teratas + lain-lain)
+  const perKat = {}; ih.forEach(r => { perKat[r[2]] = (perKat[r[2]] || 0) + r[3]; });
+  const kats = Object.keys(perKat).map(n => ({ nama: n, n: perKat[n] })).sort((a, b) => b.n - a.n);
+  const warnaKat = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)'];
+  let seg = kats.slice(0, 5).map((x, i) => Object.assign({ warna: warnaKat[i] }, x));
+  if (kats.length > 5) seg.push({ nama: 'Lain-lain (' + (kats.length - 5) + ' kategori)', n: kats.slice(5).reduce((s, x) => s + x.n, 0), warna: 'var(--c-lain)' });
+  const jumKat = kats.reduce((s, x) => s + x.n, 0) || 1;
+  const k2 = kadViz('Ambilan mengikut kategori', 'Bahagian setiap kategori daripada jumlah unit', kats.length ? '<div class="donut-wrap">' + donut(seg) + '<div class="vlegend">' +
+    seg.map(x => '<div class="lg-row"><span class="lg-n"><i style="background:' + x.warna + '"></i>' + esc(x.nama) + '</span><b>' + x.n + ' · ' + Math.round(x.n / jumKat * 100) + '%</b></div>').join('') + '</div></div>' : '<div class="vkosong">Belum ada data.</div>',
+    kats.length ? jadualHtml(['Kategori', 'Unit', '%'], kats.map(x => [x.nama, x.n, Math.round(x.n / jumKat * 100) + '%'])) : '');
+
+  // 3. Ambilan harian (Sistem vs Google Form)
+  const sis = hari.map(k => amb.filter(a => a[0] === k && a[2] === 'S').length), bor = hari.map(k => amb.filter(a => a[0] === k && a[2] === 'B').length);
+  const adaBorang = bor.some(Boolean);
+  const siri = [{ nama: 'Sistem', nilai: sis, warna: 'var(--c1)' }].concat(adaBorang ? [{ nama: 'Google Form', nilai: bor, warna: 'var(--c2)' }] : []);
+  const k3 = kadViz('Ambilan harian', adaBorang ? 'Ambilan melalui Google Form tidak menolak stok. Sasaran: semua melalui sistem.' : 'Bilangan ambilan pelajar setiap hari',
+    (adaBorang ? '<div class="vlegend"><span><i style="background:var(--c1)"></i>Sistem <b>' + sis.reduce((a, b) => a + b, 0) + '</b></span><span><i style="background:var(--c2)"></i>Google Form <b>' + bor.reduce((a, b) => a + b, 0) + '</b></span></div>' : '') +
+    lajur(hari.map(tarikhKecil), siri, { lebar: true, aria: 'Ambilan harian', tipLabel: i => tarikhPendek(hari[i]) }),
+    jadualHtml(['Tarikh', 'Sistem'].concat(adaBorang ? ['Google Form'] : []), hari.map((k, i) => [tarikhPendek(k), sis[i]].concat(adaBorang ? [bor[i]] : []))), true);
+
+  // 4. Waktu ambilan
+  const jamS = [];
+  for (let h = 7; h <= 23; h++) jamS.push(h);
+  const perJam = jamS.map(h => amb.filter(a => a[1] === h).length);
+  let j0 = perJam.findIndex(Boolean), j1 = perJam.length - 1 - [...perJam].reverse().findIndex(Boolean);
+  if (j0 < 0) { j0 = 3; j1 = 13; }
+  const jamP = jamS.slice(j0, j1 + 1), nilaiJ = perJam.slice(j0, j1 + 1);
+  const k4 = kadViz('Waktu ambilan', 'Bilangan ambilan mengikut jam, untuk susun jadual petugas', lajur(jamP.map(h => pad(h) + ':00'), [{ nama: 'Ambilan', nilai: nilaiJ, warna: 'var(--c1)' }], { aria: 'Ambilan mengikut jam', tipLabel: i => pad(jamP[i]) + ':00 – ' + pad(jamP[i]) + ':59' }),
+    jadualHtml(['Jam', 'Ambilan'], jamP.map((h, i) => [pad(h) + ':00', nilaiJ[i]])));
+
+  // 5. Status stok sekarang
+  const st = S.d.stok, kira = { cukup: 0, rendah: 0, habis: 0, baru: 0 };
+  st.forEach(i => { kira[statusItem(i)]++; });
+  const stW = { cukup: 'var(--s-good)', rendah: 'var(--s-warn)', habis: 'var(--s-crit)', baru: 'var(--s-none)' }, stI = { cukup: '✓', rendah: '!', habis: '×', baru: '–' };
+  const rendah = st.filter(i => ['habis', 'rendah'].indexOf(statusItem(i)) >= 0).sort((a, b) => (a.stok || 0) / Math.max(1, a.min) - (b.stok || 0) / Math.max(1, b.min));
+  const k5 = kadViz('Stok perlu perhatian', 'Status semua item sekarang. Garis hitam = stok minimum.',
+    '<div class="stbar" role="img" aria-label="Status stok">' + ['cukup', 'rendah', 'habis', 'baru'].filter(k => kira[k]).map(k => '<div class="tipd" tabindex="0" data-tip="' + esc(kira[k] + ' item\n' + ST_LABEL[k]) + '" style="flex:' + kira[k] + ';background:' + stW[k] + '"></div>').join('') + '</div>' +
+    '<div class="vlegend">' + ['cukup', 'rendah', 'habis', 'baru'].map(k => '<span><i style="background:' + stW[k] + '"></i>' + stI[k] + ' ' + ST_LABEL[k] + ' <b>' + kira[k] + '</b></span>').join('') + '</div>' +
+    (rendah.length ? hbars(rendah.slice(0, 8).map(i => ({ nama: i.nama, n: i.stok || 0, tanda: i.min, label: (i.stok || 0) + '/' + i.min, warna: statusItem(i) === 'habis' ? 'var(--s-crit)' : 'var(--s-warn)', ket: ST_LABEL[statusItem(i)] + ' · minimum ' + i.min + ' ' + i.unit })), '', 'unit') : '<div class="vkosong">✓ Semua stok melebihi paras minimum.</div>'),
+    jadualHtml(['Item', 'Stok', 'Minimum', 'Status'], st.map(i => [i.nama, i.stok == null ? '–' : i.stok, i.min, ST_LABEL[statusItem(i)]])));
+
+  // 6. Beza kiraan stok
+  const kr = L.kiraan.filter(r => set.has(r[0]));
+  const perBeza = {}; kr.forEach(r => { const o = perBeza[r[1]] || (perBeza[r[1]] = { n: 0, kali: 0 }); o.n += r[3]; if (r[3]) o.kali++; });
+  const bezaList = Object.keys(perBeza).map(n => ({ nama: n, n: perBeza[n].n, kali: perBeza[n].kali })).filter(r => r.kali).sort((a, b) => Math.abs(b.n) - Math.abs(a.n) || b.kali - a.kali);
+  const k6 = kadViz('Beza kiraan stok', 'Jumlah beza (rak + kotak berbanding sistem) dalam setiap kiraan. − = barang hilang tanpa rekod.',
+    bezaList.length ? '<div class="vlegend"><span><i style="background:var(--s-crit)"></i>Kurang dari sistem</span><span><i style="background:var(--c1)"></i>Lebih dari sistem</span></div>' + dvbars(bezaList.slice(0, 10).map(r => ({ nama: r.nama, n: r.n, ket: 'Berbeza dalam ' + r.kali + ' kiraan' }))) : '<div class="vkosong">' + (kr.length ? '✓ Semua kiraan dalam tempoh ini tepat.' : 'Belum ada kiraan stok dalam tempoh ini.') + '</div>',
+    bezaList.length ? jadualHtml(['Item', 'Jumlah beza', 'Kali berbeza'], bezaList.map(r => [r.nama, (r.n > 0 ? '+' : '') + r.n, r.kali])) : '');
+
+  // 7. Suhu
+  const su = L.suhu.map(r => ({ t: new Date(r[0]).getTime(), k: kunciDari(new Date(r[0])), jenis: r[1], ch: r[2], ac: r[3] })).filter(r => set.has(r.k));
+  const tC = su.filter(r => r.ch != null).map(r => ({ t: r.t, k: r.k, v: r.ch, label: r.jenis + ' · ' + masa(new Date(r.t).toISOString()) }));
+  const tA = su.filter(r => r.ac != null).map(r => ({ t: r.t, k: r.k, v: r.ac, label: r.jenis + ' · ' + masa(new Date(r.t).toISOString()) }));
+  const jc = L.julat.chiller, ja = L.julat.aircond;
+  const kSuhu = (tt, jl, nama) => tt.length ? garis(tt, jl, { aria: 'Suhu ' + nama }) + '<div class="vlegend"><span><i class="ln" style="background:var(--c1)"></i>Suhu ' + nama + '</span><span><i style="background:var(--v-band);border:1px solid var(--s-good)"></i>Julat ' + jl[0] + '–' + jl[1] + '°C</span><span><i style="background:var(--s-crit);border-radius:50%"></i>Luar julat <b>' + tt.filter(p => p.v < jl[0] || p.v > jl[1]).length + '</b></span></div>' : '<div class="vkosong">Belum ada rekod suhu dalam tempoh ini.</div>';
+  const k7 = kadViz('Suhu chiller', 'Setiap rekod buka dan tutup kiosk', kSuhu(tC, jc, 'chiller'), tC.length ? jadualHtml(['Masa', '°C'], tC.map(p => [p.label, p.v])) : '');
+  const k8 = kadViz('Suhu aircond', 'Tetapan untuk penjimatan tenaga', kSuhu(tA, ja, 'aircond'), tA.length ? jadualHtml(['Masa', '°C'], tA.map(p => [p.label, p.v])) : '');
+
+  // 9. Staf meal
+  const perStaf = {}; sh.forEach(r => { perStaf[r[1]] = (perStaf[r[1]] || 0) + r[3]; });
+  const sm = Object.keys(perStaf).map(n => ({ nama: n, n: perStaf[n] })).sort((a, b) => b.n - a.n);
+  const k9 = kadViz('Staf meal mengikut item', 'Unit diambil oleh staf JPP', sm.length ? hbars(sm.slice(0, 8), 'var(--c1)', 'unit') : '<div class="vkosong">Tiada staf meal dalam tempoh ini.</div>', sm.length ? jadualHtml(['Item', 'Unit'], sm.map(r => [r.nama, r.n])) : '');
+
+  return atas + '<div class="' + (T.muat ? 'lap-muat' : '') + '" style="display:flex;flex-direction:column;gap:12px">' +
+    '<p class="hint" style="margin:0">' + esc(tarikhPendek(mula)) + ' hingga ' + esc(tarikhPendek(L.hariIni)) + '</p>' + tiles +
+    '<div class="vgrid">' + k1 + k2 + k3 + k4 + k5 + k6 + k7 + k8 + k9 + '</div></div>';
+}
+// Tooltip carta (teks sahaja, tidak pernah innerHTML)
+(function(){
+  const tip = $('#vizTip');
+  function tunjukTip(el, x, y){
+    const baris = String(el.dataset.tip || '').split('\n');
+    tip.textContent = '';
+    const b = document.createElement('b'); b.textContent = baris[0]; tip.appendChild(b);
+    baris.slice(1).forEach(t => { const sp = document.createElement('span'); sp.textContent = t; tip.appendChild(sp); tip.appendChild(document.createElement('br')); });
+    tip.hidden = false;
+    const w = tip.offsetWidth, h = tip.offsetHeight;
+    tip.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, x + 14)) + 'px';
+    tip.style.top = Math.max(8, y - h - 12) + 'px';
+  }
+  document.addEventListener('pointermove', e => {
+    const el = e.target.closest && e.target.closest('[data-tip]');
+    if (!el || !el.closest('.vcard')) { tip.hidden = true; return; }
+    tunjukTip(el, e.clientX, e.clientY);
+  });
+  document.addEventListener('focusin', e => {
+    const el = e.target.closest && e.target.closest('[data-tip]');
+    if (!el || !el.closest('.vcard')) { tip.hidden = true; return; }
+    const r = el.getBoundingClientRect(); tunjukTip(el, r.left + r.width / 2, r.top);
+  });
+  document.addEventListener('scroll', () => { tip.hidden = true; }, true);
+})();
+let ubahSaizLap = 0;
+window.addEventListener('resize', () => { clearTimeout(ubahSaizLap); ubahSaizLap = setTimeout(() => { if (S.d && S.mode === 'staf' && S.tab === 'laporan') render(); }, 250); });
 
 function stafPelajar(u){
   const f = S.pel;
@@ -1178,9 +1791,9 @@ function stafPelajar(u){
 function stafLog(u){
   const f = S.log;
   const list = u.log.filter(l => !f.t || l.jenis === f.t);
-  return '<div class="bar"><div class="chips">'+[['','Semua'],['Masuk','Masuk'],['Keluar','Keluar'],['Ambilan','Ambilan'],['Kiraan','Kiraan']].map(c => '<button class="chip" data-lt="'+c[0]+'" aria-pressed="'+(f.t === c[0])+'">'+c[1]+'</button>').join('')+'</div></div>'+
+  return '<div class="bar"><div class="chips">'+[['','Semua'],['Masuk','Masuk'],['Keluar','Keluar'],['Ambilan','Ambilan'],['Staf','Staf meal'],['Pindah','Kotak → rak'],['Kiraan','Kiraan']].map(c => '<button class="chip" data-lt="'+c[0]+'" aria-pressed="'+(f.t === c[0])+'">'+c[1]+'</button>').join('')+'</div></div>'+
     '<section class="panel"><ul class="list">'+(list.length ? list.map(l => {
-      const tanda = l.jenis === 'Masuk' ? '+'+l.qty : l.jenis === 'Kiraan' ? '='+l.selepas : l.jenis === 'Padam' ? '×' : '−'+l.qty;
+      const tanda = l.jenis === 'Masuk' ? '+'+l.qty : l.jenis === 'Kiraan' ? '='+l.selepas : l.jenis === 'Padam' ? '×' : l.jenis === 'Pindah' ? '⇢'+l.qty : '−'+l.qty;
       return '<li class="row"><div class="row-main"><div class="row-t">'+esc(l.item)+'</div><div class="row-m"><span>'+esc(l.jenis)+'</span><span>stok '+l.sebelum+' → '+l.selepas+'</span>'+(l.catatan ? '<span>'+esc(l.catatan)+'</span>' : '')+'</div><div class="row-m"><span>'+esc(masa(l.masa))+'</span><span>'+esc(l.oleh)+'</span></div></div><div class="row-side"><span class="lt '+l.jenis.toLowerCase()+'">'+tanda+'</span></div></li>';
     }).join('') : '<li class="empty"><strong>Belum ada aktiviti stok</strong>Setiap stok masuk, keluar, kiraan dan ambilan direkod di sini.</li>')+'</ul></section>';
 }
@@ -1190,7 +1803,14 @@ $('#main').addEventListener('click', e => {
   if (S.mode !== 'staf') return;
   const tt = e.target.closest('[data-tt]'); if (tt && S.tab === 'tetapan') { aksiTed(tt); return; }
   const t = e.target.closest('[data-tab]'); if (t) { if (S.tab === 'tetapan' && t.dataset.tab !== 'tetapan') tutupTed(); S.tab = t.dataset.tab; render(); return; }
-  const g = e.target.closest('[data-goto]'); if (g) { S.tab = g.dataset.goto; if (g.dataset.st) S.stok = {q:'',cat:'',st:g.dataset.st}; render(); return; }
+  const g = e.target.closest('[data-goto]'); if (g) { S.tab = g.dataset.goto; if (g.dataset.st) S.stok = {q:'',cat:'',st:g.dataset.st}; if (g.dataset.srcGoto) S.amb = {q:'', src:g.dataset.srcGoto}; render(); return; }
+  const sah = e.target.closest('[data-sah]'); if (sah) { const a = S.d.urus.ambilan.find(x => x.id === sah.dataset.sah); if (a) bukaSahkanKiosk(a); return; }
+  const kpa = e.target.closest('[data-kpa]'); if (kpa) { aksiKiraan(kpa); return; }
+  const lh = e.target.closest('[data-lhari]'); if (lh) { S.lap.hari = Number(lh.dataset.lhari); render(); return; }
+  const lm = e.target.closest('[data-lmuat]'); if (lm) { muatLaporan(); return; }
+  const sa = e.target.closest('[data-sa]'); if (sa) { aksiSuhu(sa); return; }
+  const smx = e.target.closest('[data-sm]'); if (smx) { aksiMeal(smx); return; }
+  const lap = e.target.closest('[data-lap]'); if (lap) { const L = (S.d.urus.kiraan || []).find(x => x.id === lap.dataset.lap); if (L) bukaLaporan(L, false); return; }
   const src = e.target.closest('[data-src]'); if (src) { S.amb.src = src.dataset.src; render(); return; }
   const ps = e.target.closest('[data-pst]'); if (ps) { S.pel.st = ps.dataset.pst; render(); return; }
   const lt = e.target.closest('[data-lt]'); if (lt) { S.log.t = lt.dataset.lt; render(); return; }
@@ -1203,16 +1823,33 @@ $('#main').addEventListener('click', e => {
 $('#main').addEventListener('input', e => {
   if (S.mode !== 'staf') return;
   if (S.tab === 'tetapan') { kemasTed(e.target); return; }
+  if (e.target.dataset.kp) { kemasKiraan(e.target); return; }
+  if (S.tab === 'suhu' && kemasSuhu(e.target)) return;
   const id = e.target.id;
-  if (id === 'sQ') S.stok.q = e.target.value; else if (id === 'aQ') S.amb.q = e.target.value; else if (id === 'pQ') S.pel.q = e.target.value; else return;
+  if (id === 'kpNota') { S.kp.nota = e.target.value; simpanDraf(); return; }
+  if (id === 'smNota') { S.meal.nota = e.target.value; return; }
+  if (id === 'sQ') S.stok.q = e.target.value; else if (id === 'aQ') S.amb.q = e.target.value; else if (id === 'pQ') S.pel.q = e.target.value; else if (id === 'kpQ') S.kp.q = e.target.value; else return;
   clearTimeout(S.tq); S.tq = setTimeout(render, 150);
 });
 $('#main').addEventListener('change', e => {
   if (S.mode !== 'staf') return;
   if (S.tab === 'tetapan') { if (e.target.dataset.tw) render(); return; }
+  if (S.tab === 'suhu' && e.target.dataset.sus != null) { render(); return; }
   if (e.target.id === 'sCat') { S.stok.cat = e.target.value; render(); }
   if (e.target.id === 'sSt') { S.stok.st = e.target.value; render(); }
+  if (e.target.id === 'kpKat') { S.kp.cat = e.target.value; render(); }
+  if (e.target.id === 'kpTapis') { S.kp.tapis = e.target.value; render(); }
 });
+$('#main').addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || !e.target.dataset || !e.target.dataset.kp) return;
+  e.preventDefault();
+  const semua = Array.from(document.querySelectorAll('[data-kp]')); const n = semua[semua.indexOf(e.target) + 1];
+  if (n) { n.focus(); n.select(); } else e.target.blur();
+});
+// Di kiosk: senarai ambilan dimuat semula setiap 30 saat supaya ambilan baharu terus kelihatan
+setInterval(() => {
+  if (S.d && S.token && S.mode === 'staf' && S.tab === 'ambilan' && !document.hidden && !dlg.open && !(document.activeElement && document.activeElement.id === 'aQ' && document.activeElement.value)) muat(false);
+}, 30000);
 
 /* ---------- dialogs ---------- */
 const dlg = $('#dlg');
@@ -1227,29 +1864,35 @@ async function aksiStaf(fn, args, btn, errEl, mesej){
 }
 
 function bukaTransaksi(i, mod){
-  const u = i.unit || 'unit', kini = i.stok || 0;
-  bukaDlg('<form id="fTx" novalidate><div class="dlg-head"><h2>'+esc(i.nama)+'</h2><p>'+esc(i.kategori)+(i.lokasi ? ' · '+esc(i.lokasi) : '')+'</p></div><div class="dlg-body">'+
-    '<div class="seg" role="group" aria-label="Jenis"><button type="button" data-m="Masuk">Stok masuk</button><button type="button" data-m="Keluar">Stok keluar</button><button type="button" data-m="Kiraan">Kiraan semula</button></div>'+
+  const u = i.unit || 'unit', kini = i.stok || 0, kotak = i.kotak || 0;
+  bukaDlg('<form id="fTx" novalidate><div class="dlg-head"><h2>'+esc(i.nama)+'</h2><p>'+esc(i.kategori)+(i.lokasi ? ' · '+esc(i.lokasi) : '')+' · rak '+Math.max(0, kini - kotak)+' · kotak '+kotak+'</p></div><div class="dlg-body">'+
+    '<div class="seg" role="group" aria-label="Jenis"><button type="button" data-m="Masuk">Stok masuk</button><button type="button" data-m="Keluar">Stok keluar</button><button type="button" data-m="Pindah"'+(kotak > 0 ? '' : ' hidden')+'>Kotak → rak</button><button type="button" data-m="Kiraan">Kiraan semula</button></div>'+
     '<div class="field"><label for="txQ" id="txL">Kuantiti</label><input id="txQ" type="number" inputmode="numeric" min="0" step="1"></div>'+
+    '<div class="field" id="txTW"><span class="lbl-s">Simpan di</span><div class="chips"><label class="mini"><input type="radio" name="txT" value="rak" checked> Rak / chiller (dipamerkan)</label><label class="mini"><input type="radio" name="txT" value="kotak"> Dalam kotak / stor</label></div></div>'+
     '<div class="field" id="txLW"><label for="txLuput">Tarikh luput terdekat</label><input id="txLuput" type="date" value="'+esc(i.luput || '')+'"><span class="hint">Kemas kini jika stok baharu luput lebih awal.</span></div>'+
     '<div class="field"><label for="txC">Catatan (pilihan)</label><input id="txC" maxlength="140"></div>'+
     '<div class="preview" id="txP"></div><div class="err" id="txE"></div></div>'+
     '<div class="dlg-foot"><div class="right"><button type="button" class="btn" data-close>Batal</button><button class="btn primary" id="txGo" type="submit">Simpan</button></div></div></form>');
   let m = mod;
-  const upd = () => { const q = parseInt($('#txQ').value, 10); const s = isNaN(q) ? null : m === 'Masuk' ? kini + q : m === 'Keluar' ? kini - q : q;
+  const upd = () => { const q = parseInt($('#txQ').value, 10);
+    if (m === 'Pindah') { const k = isNaN(q) ? null : kotak - q;
+      $('#txP').innerHTML = '<span>Dalam kotak <b>'+kotak+'</b></span><span>Selepas pindah: rak <b>'+(k == null ? '–' : kini - k)+'</b> · kotak <b style="color:'+(k < 0 ? 'var(--crit)' : 'inherit')+'">'+(k == null ? '–' : k)+'</b></span>'; return; }
+    const s = isNaN(q) ? null : m === 'Masuk' ? kini + q : m === 'Keluar' ? kini - q : q;
     $('#txP').innerHTML = '<span>Stok sekarang <b>'+(i.stok == null ? '–' : kini)+'</b></span><span>Selepas simpan <b style="color:'+(s < 0 ? 'var(--crit)' : 'inherit')+'">'+(s == null ? '–' : s)+'</b> '+esc(u)+'</span>'; };
   const setM = x => { m = x; dlg.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === m)));
-    $('#txL').textContent = m === 'Kiraan' ? 'Jumlah sebenar di rak ('+u+')' : 'Kuantiti ('+u+')';
-    $('#txLW').hidden = m !== 'Masuk';
-    $('#txC').placeholder = m === 'Masuk' ? 'Contoh: Sumbangan alumni / belian koperasi' : m === 'Keluar' ? 'Contoh: Rosak / diagihkan ke program' : 'Contoh: Kiraan mingguan';
+    $('#txL').textContent = m === 'Kiraan' ? 'Jumlah sebenar, rak + kotak ('+u+')' : m === 'Pindah' ? 'Kuantiti dikeluarkan dari kotak ke rak ('+u+')' : 'Kuantiti ('+u+')';
+    $('#txLW').hidden = m !== 'Masuk'; $('#txTW').hidden = m !== 'Masuk';
+    $('#txC').placeholder = m === 'Masuk' ? 'Contoh: Sumbangan alumni / belian koperasi' : m === 'Keluar' ? 'Contoh: Rosak / diagihkan ke program' : m === 'Pindah' ? 'Contoh: Restock rak petang' : 'Contoh: Kiraan mingguan';
     if (m === 'Kiraan' && !$('#txQ').value && i.stok != null) $('#txQ').value = kini; upd(); };
   dlg.querySelectorAll('.seg button').forEach(b => b.onclick = () => setM(b.dataset.m));
   $('#txQ').addEventListener('input', upd); setM(m);
   $('#fTx').addEventListener('submit', ev => { ev.preventDefault();
     const q = parseInt($('#txQ').value, 10);
     if (isNaN(q) || q < 0 || (m !== 'Kiraan' && q === 0)) { $('#txE').textContent = m === 'Kiraan' ? 'Masukkan jumlah sebenar (0 atau lebih).' : 'Masukkan kuantiti sekurang-kurangnya 1.'; return; }
-    aksiStaf('transaksiStok', [i.id, m, q, $('#txC').value.trim(), m === 'Masuk' ? $('#txLuput').value : null], $('#txGo'), $('#txE'),
-      m === 'Masuk' ? '+'+q+' '+u+' '+i.nama+' direkod' : m === 'Keluar' ? '−'+q+' '+u+' '+i.nama+' direkod' : 'Kiraan '+i.nama+' dikemas kini');
+    if (m === 'Pindah' && q > kotak) { $('#txE').textContent = 'Dalam kotak hanya ada '+kotak+' '+u+'.'; return; }
+    const tempat = (dlg.querySelector('input[name="txT"]:checked') || {}).value || 'rak';
+    aksiStaf('transaksiStok', [i.id, m, q, $('#txC').value.trim(), m === 'Masuk' ? $('#txLuput').value : null, m === 'Masuk' ? tempat : null], $('#txGo'), $('#txE'),
+      m === 'Masuk' ? '+'+q+' '+u+' '+i.nama+(tempat === 'kotak' ? ' disimpan dalam kotak' : ' direkod') : m === 'Keluar' ? '−'+q+' '+u+' '+i.nama+' direkod' : m === 'Pindah' ? q+' '+u+' '+i.nama+' dipindah ke rak' : 'Kiraan '+i.nama+' dikemas kini');
   });
 }
 
@@ -1685,7 +2328,15 @@ function stafTetapan(){
     (senaraiIklan().length ? '<div class="tgrp"><div class="tlbl">Pratonton</div><div class="hint">Iklan yang sudah disimpan dan dipaparkan kepada pelajar</div><div class="ik-pra"><div class="iklan-slot"></div></div></div>' : '') +
     '<div class="err" id="errIklan"></div><div class="tfoot"><span></span><button type="button" class="btn primary" data-tt="simpan-iklan">Simpan papan iklan</button></div></div></section>';
 
-  return tema + teks + iklan + aturan + had + staf;
+  const suhuT = '<section class="panel"><div class="panel-head"><h3>Staf meal &amp; suhu</h3><span>Had staf meal, julat suhu dan prosedur buka/tutup kiosk</span></div><div class="panel-body tset">'+
+    '<div class="grid3"><div class="field"><label for="tvMeal">Had staf meal sehari (item)</label><input id="tvMeal" type="number" min="0" max="20" data-tv="HAD_STAF_SEHARI" value="'+esc(n.HAD_STAF_SEHARI)+'"><span class="hint">0 = tidak dibenarkan</span></div>'+
+    '<div class="field"><label for="tvSC">Julat suhu chiller (°C)</label><input id="tvSC" data-tv="SUHU_CHILLER" placeholder="0-5" value="'+esc(n.SUHU_CHILLER)+'"><span class="hint">Cth: 0-5</span></div>'+
+    '<div class="field"><label for="tvSA">Julat tetapan aircond (°C)</label><input id="tvSA" data-tv="SUHU_AIRCOND" placeholder="24-26" value="'+esc(n.SUHU_AIRCOND)+'"><span class="hint">Cth: 24-26 untuk jimat tenaga</span></div></div>'+
+    '<div class="grid2"><div class="field"><label for="tvSB">Senarai semak buka kiosk</label><textarea id="tvSB" rows="6" data-tv="SEMAK_BUKA">'+esc(n.SEMAK_BUKA)+'</textarea><span class="hint">Satu perkara setiap baris, ikut prosedur JPP</span></div>'+
+    '<div class="field"><label for="tvST">Senarai semak tutup kiosk</label><textarea id="tvST" rows="6" data-tv="SEMAK_TUTUP">'+esc(n.SEMAK_TUTUP)+'</textarea><span class="hint">Satu perkara setiap baris</span></div></div>'+
+    '<div class="err" id="errSuhuT"></div><div class="tfoot"><span></span><button type="button" class="btn primary" data-tt="simpan-suhu">Simpan</button></div></div></section>';
+
+  return tema + teks + iklan + aturan + suhuT + had + staf;
 }
 
 function kemasTed(el){
@@ -1773,6 +2424,12 @@ async function aksiTed(b){
     const d = await simpanTed(b, 'errAturan', 'simpanTetapan', [{ TERIMA_AMBILAN: n.TERIMA_AMBILAN, MESEJ_TUTUP: n.MESEJ_TUTUP, HAD_ITEM_SEKALI: n.HAD_ITEM_SEKALI,
       SELANG_HARI: n.SELANG_HARI, HAD_SEMINGGU: n.HAD_SEMINGGU, DOMAIN_EMEL: n.DOMAIN_EMEL, WAKTU_OPERASI: T.sesi.map(x => x.mula + '-' + x.tamat).join(', ') }]);
     if (d) { render(); toast('Tetapan ambilan disimpan'); }
+    return;
+  }
+  if (tt === 'simpan-suhu') {
+    const n = T.nilai;
+    const d = await simpanTed(b, 'errSuhuT', 'simpanTetapan', [{ HAD_STAF_SEHARI: n.HAD_STAF_SEHARI, SUHU_CHILLER: n.SUHU_CHILLER, SUHU_AIRCOND: n.SUHU_AIRCOND, SEMAK_BUKA: n.SEMAK_BUKA, SEMAK_TUTUP: n.SEMAK_TUTUP }]);
+    if (d) { ['HAD_STAF_SEHARI','SUHU_CHILLER','SUHU_AIRCOND','SEMAK_BUKA','SEMAK_TUTUP'].forEach(k => { T.nilai[k] = d.urus.tetapan.nilai[k]; }); S.suhu = null; render(); toast('Tetapan staf meal dan suhu disimpan'); }
     return;
   }
   if (tt === 'simpan-had') {
