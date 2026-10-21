@@ -280,7 +280,8 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
 .sesi{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .sesi input{width:auto;min-width:0;flex:1 1 120px}
 .trows{display:flex;flex-direction:column;gap:8px}
-.trow{display:grid;grid-template-columns:minmax(0,2fr) 76px 84px minmax(0,2.4fr) 40px;gap:8px;align-items:center}
+.trow{display:grid;grid-template-columns:minmax(0,2fr) 76px 104px minmax(0,2.4fr) 40px;gap:8px;align-items:center}
+.mini-grp{display:flex;flex-direction:column;gap:2px}
 .trow.staf{grid-template-columns:minmax(0,2fr) minmax(0,1.4fr) minmax(0,1.2fr) 40px}
 .trow.gab input:first-child{font-style:italic}
 .trow .btn{padding:8px 0;text-align:center}
@@ -910,6 +911,8 @@ function bolehTambah(pick, stok, item, had){
   if (had > 0 && jumlah > had) return false;
   const h = hadKat(item.kategori);
   if (h.had != null && (k[item.kategori] || 0) > h.had) return false;
+  // "Satu jenis sahaja": tidak boleh campur barang lain dalam kategori yang sama
+  if (h.satuJenis && Object.keys(pick).some(id => String(id) !== String(item.id) && pick[id] > 0 && ((stok || S.d.stok).find(x => String(x.id) === String(id)) || {}).kategori === item.kategori)) return false;
   return !S.d.had.kumpulan.some(g => g.kategori.indexOf(item.kategori) >= 0 && g.had != null &&
     g.kategori.reduce((s, c) => s + (k[c] || 0), 0) > g.had);
 }
@@ -918,7 +921,7 @@ function pickerHtml(stok, pick, had){
   stok.forEach(i => { (ikut[i.kategori] = ikut[i.kategori] || []).push(i); });
   return S.d.kategori.concat(Object.keys(ikut).filter(c => S.d.kategori.indexOf(c) < 0)).filter(c => ikut[c]).map(c => {
     const h = hadKat(c), n = k[c] || 0;
-    return '<div class="cat"><div><span class="cat-n">'+esc(c)+'</span>'+(h.ket ? '<span class="cat-k">'+esc(h.ket)+'</span>' : '')+'</div>'+
+    return '<div class="cat"><div><span class="cat-n">'+esc(c)+'</span>'+(h.ket || h.satuJenis ? '<span class="cat-k">'+esc([h.ket, h.satuJenis ? 'Pilih satu jenis sahaja' : ''].filter(Boolean).join(' · '))+'</span>' : '')+'</div>'+
       (h.had != null ? '<span class="cat-c'+(n >= h.had ? ' full' : '')+'">'+n+' / '+h.had+'</span>' : '')+'</div>' +
     ikut[c].map(i => {
       const n = pick[i.id] || 0;
@@ -1330,7 +1333,7 @@ function mulaTed(){
     tema: Object.assign({}, TEMA_ASAL_C, S.d.awam.tema),
     nilai: Object.assign({}, t.nilai),
     sesi: pecahSesi(t.nilai.WAKTU_OPERASI),
-    had: t.had.map(r => ({ kategori: r.kategori, had: r.had === '' || r.had == null ? '' : r.had, papar: r.kategori.indexOf('+') >= 0 ? true : !/^tidak$/i.test(r.papar || ''), ket: r.ket || '' })),
+    had: t.had.map(r => ({ kategori: r.kategori, had: r.had === '' || r.had == null ? '' : r.had, papar: r.kategori.indexOf('+') >= 0 ? true : !/^tidak$/i.test(r.papar || ''), ket: r.ket || '', satuJenis: !!r.satuJenis })),
     staf: t.staf.map(r => Object.assign({}, r))
   };
 }
@@ -1389,7 +1392,8 @@ function stafTetapan(){
       const gab = r.kategori.indexOf('+') >= 0;
       return '<div class="trow' + (gab ? ' gab' : '') + '"><input id="th' + i + 'k" aria-label="Nama kategori" data-th="' + i + '|kategori" value="' + esc(r.kategori) + '" placeholder="Nama kategori">' +
         '<input id="th' + i + 'h" type="number" min="0" max="50" inputmode="numeric" aria-label="Had" data-th="' + i + '|had" value="' + esc(r.had) + '" placeholder="Tiada">' +
-        (gab ? '<span class="hint tgab">Gabungan</span>' : '<label class="mini"><input type="checkbox" id="th' + i + 'p" data-th="' + i + '|papar"' + (r.papar ? ' checked' : '') + '> Papar</label>') +
+        (gab ? '<span class="hint tgab">Gabungan</span>' : '<div class="mini-grp"><label class="mini"><input type="checkbox" id="th' + i + 'p" data-th="' + i + '|papar"' + (r.papar ? ' checked' : '') + '> Papar</label>' +
+          '<label class="mini" title="Pelajar hanya boleh pilih satu jenis barang dalam kategori ini"><input type="checkbox" id="th' + i + 's" data-th="' + i + '|satuJenis"' + (r.satuJenis ? ' checked' : '') + '> Satu jenis</label></div>') +
         '<input id="th' + i + 'n" aria-label="Keterangan" data-th="' + i + '|ket" value="' + esc(r.ket) + '" placeholder="Keterangan untuk pelajar">' +
         '<button type="button" class="btn danger" data-tt="buang-had" data-i="' + i + '" aria-label="Buang kategori">×</button></div>';
     }).join('') + '</div>' +
@@ -1441,7 +1445,7 @@ async function aksiTed(b){
   if (tt === 'reset-tema') { T.tema = Object.assign({}, TEMA_ASAL_C); pasangTema(T.tema); render(); return; }
   if (tt === 'tambah-sesi') { T.sesi.push({ mula:'10:00', tamat:'14:00' }); render(); return; }
   if (tt === 'buang-sesi') { T.sesi.splice(i, 1); render(); return; }
-  if (tt === 'tambah-had') { T.had.push({ kategori:'', had:1, papar:true, ket:'' }); render(); const el = $('#th' + (T.had.length - 1) + 'k'); if (el) el.focus(); return; }
+  if (tt === 'tambah-had') { T.had.push({ kategori:'', had:1, papar:true, ket:'', satuJenis:false }); render(); const el = $('#th' + (T.had.length - 1) + 'k'); if (el) el.focus(); return; }
   if (tt === 'tambah-gab') { const k = T.had.filter(r => r.kategori && r.kategori.indexOf('+') < 0).slice(0, 2).map(r => r.kategori); T.had.push({ kategori: k.join(' + '), had:2, papar:true, ket:'' }); render(); return; }
   if (tt === 'buang-had') { T.had.splice(i, 1); render(); return; }
   if (tt === 'tambah-staf') { T.staf.push({ email:'', nama:'', jawatan:'' }); render(); const el = $('#tf' + (T.staf.length - 1) + 'e'); if (el) el.focus(); return; }
@@ -1474,7 +1478,7 @@ async function aksiTed(b){
     return;
   }
   if (tt === 'simpan-had') {
-    const d = await simpanTed(b, 'errHad', 'simpanHad', [T.had.map(r => ({ kategori: r.kategori, had: r.had === '' ? '' : Number(r.had), papar: r.papar, ket: r.ket }))]);
+    const d = await simpanTed(b, 'errHad', 'simpanHad', [T.had.map(r => ({ kategori: r.kategori, had: r.had === '' ? '' : Number(r.had), papar: r.papar, ket: r.ket, satuJenis: !!r.satuJenis }))]);
     if (d) { mulaTedBahagian('had'); render(); toast('Kategori dan had disimpan'); }
     return;
   }
@@ -1486,7 +1490,7 @@ async function aksiTed(b){
 }
 function mulaTedBahagian(b){
   const t = S.d.urus.tetapan;
-  if (b === 'had') S.ted.had = t.had.map(r => ({ kategori: r.kategori, had: r.had === '' || r.had == null ? '' : r.had, papar: r.kategori.indexOf('+') >= 0 ? true : !/^tidak$/i.test(r.papar || ''), ket: r.ket || '' }));
+  if (b === 'had') S.ted.had = t.had.map(r => ({ kategori: r.kategori, had: r.had === '' || r.had == null ? '' : r.had, papar: r.kategori.indexOf('+') >= 0 ? true : !/^tidak$/i.test(r.papar || ''), ket: r.ket || '', satuJenis: !!r.satuJenis }));
   if (b === 'staf') S.ted.staf = t.staf.map(r => Object.assign({}, r));
 }
 
