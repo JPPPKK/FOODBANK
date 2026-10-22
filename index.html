@@ -216,7 +216,7 @@ button.tile:hover{border-color:var(--muted)}
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted)}
 .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
-.item{display:grid;grid-template-columns:minmax(0,1fr) 96px 104px auto;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+.item{display:grid;grid-template-columns:minmax(0,1fr) 140px 104px auto;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
 .item:first-child{border-top:0}
 .shelf{font-family:var(--display);font-weight:700;letter-spacing:.04em;background:var(--sunk);padding:0 6px;border-radius:3px}
 .exp-warn{color:var(--warn);font-weight:600} .exp-crit{color:var(--crit);font-weight:600}
@@ -273,6 +273,19 @@ button.tile:hover{border-color:var(--muted)}
 #vizTip b{display:block;font-size:15px}
 #vizTip span{color:var(--muted)}
 .lap-muat{opacity:.55;transition:opacity .2s}
+/* restock rak */
+.rs-row{display:grid;grid-template-columns:minmax(0,1fr) 110px 96px 110px 110px;gap:12px;align-items:center;padding:10px 16px;border-top:1px solid var(--line)}
+.rs-row.perlu{background:color-mix(in srgb,var(--yellow) 7%,var(--surface))}
+.rs-rak{text-align:right;line-height:1.1}
+.rs-rak b{font-family:var(--display);font-size:26px}
+.rs-rak small{display:block;font-size:12px;color:var(--muted)}
+.rs-row label{display:flex;flex-direction:column;gap:2px;font-size:11px;font-weight:600;color:var(--muted)}
+.rs-row input{text-align:center;font-family:var(--display);font-size:18px;font-weight:700;padding:6px}
+.rs-cad{text-align:center}
+.rs-cad b{display:block;font-family:var(--display);font-size:24px;color:var(--ink)}
+.rs-cad small{font-size:11px;color:var(--muted)}
+.rs-kurang{grid-column:1/-1;font-size:12px;color:var(--crit);font-weight:600;margin-top:-4px}
+.qty-rak small.jum{display:block;white-space:nowrap}
 /* batch & FEFO */
 .bt-row{display:grid;grid-template-columns:minmax(0,1fr) 120px 150px auto;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
 .bt-row .bt-q{font-family:var(--display);font-weight:700;font-size:22px;text-align:right;line-height:1}
@@ -485,6 +498,9 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
   .trow.staf.pemilik > :nth-child(4){display:none}
   .vgrid{grid-template-columns:1fr}
   .suhu-in{grid-template-columns:1fr 1fr}
+  .rs-foot .field{display:none}
+  .rs-row{grid-template-columns:minmax(0,1fr) 84px;grid-template-areas:"n r" "h c" "q q" "k k"}
+  .rs-row > :nth-child(1){grid-area:n} .rs-row > :nth-child(2){grid-area:r} .rs-row > :nth-child(3){grid-area:h} .rs-row > :nth-child(4){grid-area:c} .rs-row > :nth-child(5){grid-area:q} .rs-row > .rs-kurang{grid-area:k}
   .bt-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"m q" "l l" "a a"}
   .bt-row > :nth-child(1){grid-area:m} .bt-row > :nth-child(2){grid-area:q} .bt-row > :nth-child(3){grid-area:l} .bt-row > :nth-child(4){grid-area:a}
   .bt-acts{justify-content:flex-start}
@@ -919,8 +935,15 @@ function bacaToken(){ try { return localStorage.getItem(KUNCI_TOKEN); } catch(e)
 function api(fn, ...args){
   if (!ADA_GAS && ADA_API) {
     // Tanpa cookie: Google tidak tahu akaun mana yang log masuk, jadi tiada ralat /u/1/
-    return fetch(API_URL, { method:'POST', credentials:'omit', redirect:'follow', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) })
-      .catch(e => { console.error('[FoodBank] fetch gagal:', fn, e); throw new Error('Tiada sambungan ke pelayan. Semak internet anda, atau cuba tetingkap Incognito (sambungan mungkin disekat oleh sambungan pelayar / rangkaian). [' + fn + ']'); })
+    // Cuba semula secara automatik (sehingga 3 kali) jika sambungan terputus seketika
+    const hantar = cubaan => fetch(API_URL, { method:'POST', credentials:'omit', redirect:'follow', cache:'no-store', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) })
+      .catch(e => {
+        console.error('[FoodBank] fetch gagal (cubaan ' + cubaan + '):', fn, e);
+        // Hanya fungsi baca sahaja dicuba semula, supaya rekod (cth: ambilan) tidak tersimpan dua kali
+        if (cubaan < 3 && ['muatData', 'awamData', 'laporanData', 'butiranAmbilan', 'iklanGambar', 'bannerData', 'iklanSenarai'].indexOf(fn) >= 0) return wait(cubaan * 1500).then(() => hantar(cubaan + 1));
+        throw new Error('Tiada sambungan ke pelayan (' + (e && e.message || 'ralat rangkaian') + '). Semak internet anda, atau cuba tetingkap Incognito (sambungan mungkin disekat oleh sambungan pelayar / rangkaian). [' + fn + ']');
+      });
+    return hantar(1)
       .then(r => r.text().then(t => {
         if (!r.ok) throw new Error('Pelayan tidak dapat dihubungi (' + r.status + '). Cuba lagi.');
         try { return JSON.parse(t); }
@@ -1282,7 +1305,7 @@ function renderProfil(){
 }
 
 /* ---------------- STAF ---------------- */
-const TABS = [['ringkasan','Ringkasan'],['laporan','Laporan'],['stok','Stok'],['batch','Batch & luput'],['kiraan','Kiraan stok'],['ambilan','Ambilan'],['pelajar','Pelajar'],['suhu','Suhu'],['stafmeal','Staf meal'],['log','Log stok'],['tetapan','Tetapan']];
+const TABS = [['ringkasan','Ringkasan'],['laporan','Laporan'],['stok','Stok'],['restock','Restock rak'],['batch','Batch & luput'],['kiraan','Kiraan stok'],['ambilan','Ambilan'],['pelajar','Pelajar'],['suhu','Suhu'],['stafmeal','Staf meal'],['log','Log stok'],['tetapan','Tetapan']];
 function statusItem(i){ if (i.stok == null) return 'baru'; if (i.stok <= 0) return 'habis'; if (i.stok <= i.min) return 'rendah'; return 'cukup'; }
 const ST_LABEL = { cukup:'Cukup', rendah:'Rendah', habis:'Habis', baru:'Belum dikira' };
 function luputHampir(i){ if (!i.luput || !(i.stok > 0)) return false; return bezaHari(i.luput) <= 30; }
@@ -1299,6 +1322,7 @@ function renderStaf(){
   else if (S.tab === 'tetapan') body = stafTetapan();
   else if (S.tab === 'kiraan') body = stafKiraan(u);
   else if (S.tab === 'batch') body = stafBatch(u);
+  else if (S.tab === 'restock') body = stafRestock(u);
   else if (S.tab === 'laporan') body = stafLaporan(u);
   else if (S.tab === 'suhu') body = stafSuhu(u);
   else if (S.tab === 'stafmeal') body = stafMeal(u);
@@ -1357,9 +1381,9 @@ function stafStok(){
     '<section class="panel"><div class="panel-head"><span><strong style="color:var(--ink)">'+list.length+'</strong> daripada '+S.d.stok.length+' item</span><span>Jumlah unit: <strong style="color:var(--ink)">'+unit+'</strong></span></div><ul class="list">'+
     (list.length ? list.map(i => {
       const st = statusItem(i);
-      const meta = [esc(i.kategori), i.lokasi ? '<span class="shelf">'+esc(i.lokasi)+'</span>' : '', i.kotak ? '<span><b>Rak '+Math.max(0, (i.stok || 0) - i.kotak)+' · Kotak '+i.kotak+'</b></span>' : '', infoLuput(i), hintFefo(i)].filter(Boolean).map(x => x.startsWith('<') ? x : '<span>'+x+'</span>').join('');
+      const meta = [esc(i.kategori), i.lokasi ? '<span class="shelf">'+esc(i.lokasi)+'</span>' : '', infoLuput(i), hintFefo(i)].filter(Boolean).map(x => x.startsWith('<') ? x : '<span>'+x+'</span>').join('');
       return '<li class="item"><div class="row-main"><div class="row-t">'+esc(i.nama)+'</div><div class="row-m">'+meta+'</div></div>'+
-        '<div class="qty" style="text-align:right">'+(i.stok == null ? '–' : i.stok)+'<br><small>'+esc(i.unit)+' · min '+i.min+'</small>'+'</div>'+
+        '<div class="qty qty-rak" style="text-align:right">'+(i.stok == null ? '–' : rakItem(i))+(i.hadRak ? '<small style="display:inline"> / '+i.hadRak+'</small>' : '')+'<small class="jum">'+esc(i.unit)+' di rak</small><small class="jum">jumlah '+(i.stok == null ? '–' : i.stok)+(i.kotak ? ' · kotak '+i.kotak : '')+' · min '+i.min+'</small></div>'+
         '<span class="pill st-'+st+'">'+ST_LABEL[st]+'</span>'+
         '<div class="acts"><button class="btn in" data-act="Masuk" data-id="'+esc(i.id)+'">+ Masuk</button><button class="btn out" data-act="Keluar" data-id="'+esc(i.id)+'" '+(i.stok > 0 ? '' : 'disabled')+'>− Keluar</button>'+(i.kotak ? '<button class="btn" data-act="Pindah" data-id="'+esc(i.id)+'">Ke rak</button>' : '')+'<button class="btn" data-act="Kiraan" data-id="'+esc(i.id)+'">Kira</button><button class="btn" data-act="edit" data-id="'+esc(i.id)+'">Edit</button></div></li>';
     }).join('') : '<li class="empty"><strong>Tiada item sepadan</strong>Ubah carian atau penapis.</li>')+'</ul></section>';
@@ -1596,6 +1620,83 @@ function bukaLaporan(L, baru){
     (beza.length ? blok : '<div class="banner ok">Semua item yang dikira sama dengan sistem.</div>')+
     (baru ? '<div class="hint">Stok sistem sudah dikemas kini mengikut kiraan. Sekarang anda boleh restock dan rekod "+ Masuk" untuk barang baharu.</div>' : '')+
     '</div><div class="dlg-foot"><div class="right"><button type="button" class="btn primary" data-close>Selesai</button></div></div>');
+}
+
+/* ---------- RESTOCK RAK ---------- */
+function rakItem(i){ const s = i.stok || 0; return Math.max(0, s - Math.min(i.kotak || 0, s)); }
+function infoRestock(i){
+  const R = S.rs, h = R.had[i.id] != null ? R.had[i.id] : (i.hadRak || '');
+  const had = h === '' || !(Number(h) > 0) ? null : Math.floor(Number(h));
+  const rak = rakItem(i), cad = had ? Math.max(0, had - rak) : 0, kotak = i.kotak || 0;
+  const boleh = Math.min(cad, kotak);
+  const q = R.qty[i.id] != null && R.qty[i.id] !== '' ? Math.max(0, Math.floor(Number(R.qty[i.id]) || 0)) : boleh;
+  return { had, rak, cad, kotak, boleh, q, kurang: Math.max(0, cad - kotak) };
+}
+function stafRestock(u){
+  if (!S.rs) S.rs = { had:{}, qty:{}, tapis:'perlu', nota:'Restock selepas tutup kiosk' };
+  const R = S.rs;
+  const semua = senaraiKp().map(i => Object.assign({ i }, infoRestock(i)));
+  const perlu = semua.filter(x => x.cad > 0), tiada = semua.filter(x => !x.had);
+  const jumCad = perlu.reduce((a, x) => a + x.cad, 0), jumQ = semua.reduce((a, x) => a + Math.min(x.q, x.kotak), 0);
+  const kurang = semua.filter(x => x.kurang > 0);
+  const ubahHad = Object.keys(R.had).some(id => { const i = S.d.stok.find(z => z.id === id); return i && String(R.had[id]).trim() !== String(i.hadRak || ''); });
+  const list = semua.filter(x => R.tapis === 'semua' ? true : R.tapis === 'tiada' ? !x.had : x.cad > 0);
+  let rows = '', kini = null;
+  list.forEach(x => {
+    const i = x.i;
+    if (i.kategori !== kini) { kini = i.kategori; rows += '<li class="kp-cat"><b>'+esc(kini)+'</b></li>'; }
+    rows += '<li class="rs-row'+(x.cad > 0 ? ' perlu' : '')+'"><div class="row-main"><div class="row-t">'+esc(i.nama)+'</div><div class="row-m">'+(i.lokasi ? '<span class="shelf">'+esc(i.lokasi)+'</span>' : '')+'<span>dalam kotak '+x.kotak+' '+esc(i.unit)+'</span></div></div>'+
+      '<div class="rs-rak"><b>'+x.rak+'</b>'+(x.had ? ' / '+x.had : '')+'<small>'+esc(i.unit)+' di rak</small></div>'+
+      '<label>Had rak<input id="rh-'+esc(i.id)+'" type="number" min="1" step="1" inputmode="numeric" data-rh="'+esc(i.id)+'" aria-label="Had rak '+esc(i.nama)+'" placeholder="–" value="'+esc(R.had[i.id] != null ? R.had[i.id] : (i.hadRak || ''))+'"></label>'+
+      '<div class="rs-cad">'+(x.had ? '<b>'+(x.cad ? '+'+x.cad : '✓')+'</b><small>'+(x.cad ? 'cadangan tambah' : 'rak penuh')+'</small>' : '<small>Tetapkan had rak</small>')+'</div>'+
+      '<label>Pindah dari kotak<input id="rq-'+esc(i.id)+'" type="number" min="0" max="'+x.kotak+'" step="1" inputmode="numeric" data-rq="'+esc(i.id)+'" aria-label="Unit '+esc(i.nama)+' dipindah ke rak" value="'+(x.had || R.qty[i.id] != null ? x.q : '')+'"'+(x.kotak ? '' : ' disabled')+'></label>'+
+      (x.kurang ? '<div class="rs-kurang">⚠ Kotak/stor dalam sistem hanya ada '+x.kotak+'. Kurang '+x.kurang+' '+esc(i.unit)+' untuk penuhkan rak. Rekod "+ Masuk" jika ada stok baharu.</div>' : '')+'</li>';
+  });
+  const tiles = '<section class="tiles">'+
+    '<button class="tile warn" data-rs="tapis" data-v="perlu"><span class="n">'+perlu.length+'</span><span class="l">Item perlu restock</span></button>'+
+    '<div class="tile"><span class="n">'+jumCad+'</span><span class="l">Unit cadangan tambah</span></div>'+
+    '<button class="tile crit" data-rs="tapis" data-v="perlu"><span class="n">'+kurang.length+'</span><span class="l">Kotak/stor tidak cukup</span></button>'+
+    '<button class="tile" data-rs="tapis" data-v="tiada"><span class="n">'+tiada.length+'</span><span class="l">Belum ada had rak</span></button></section>';
+  return '<section class="panel"><div class="panel-head"><h3>Restock rak</h3><span>Penuhkan rak semula selepas kiosk ditutup</span></div><div class="panel-body">'+
+    '<p style="margin:0;color:var(--muted);font-size:14px">Tetapkan <b>had rak</b> (maksimum dipamerkan dalam sehari) untuk setiap item. Sistem cadangkan berapa unit perlu ditambah: <b>had rak − jumlah di rak sekarang</b>. Bila barang sudah disusun, tekan <b>Rekod restock</b> supaya unit dipindah dari kotak ke rak dalam sistem.</p>'+
+    '<div class="chips">'+[['perlu','Perlu restock ('+perlu.length+')'],['semua','Semua item'],['tiada','Tiada had rak ('+tiada.length+')']].map(c => '<button class="chip" data-rs="tapis" data-v="'+c[0]+'" aria-pressed="'+(R.tapis === c[0])+'">'+c[1]+'</button>').join('')+'</div></div></section>'+
+    tiles + '<section class="panel"><ul class="list">'+(rows || '<li class="empty"><strong>'+(R.tapis === 'perlu' ? '✓ Semua rak sudah penuh' : 'Tiada item')+'</strong>'+(R.tapis === 'perlu' && tiada.length ? 'Ada '+tiada.length+' item belum ada had rak. Pilih "Tiada had rak" untuk menetapkannya.' : '')+'</li>')+'</ul></section>'+
+    '<div class="kp-foot rs-foot"><div class="field"><label for="rsNota">Catatan</label><input id="rsNota" maxlength="140" value="'+esc(R.nota)+'"></div>'+
+    '<button type="button" class="btn" data-rs="had"'+(ubahHad ? '' : ' disabled')+'>Simpan had rak</button>'+
+    '<button type="button" class="btn" data-rs="salin"'+(perlu.length ? '' : ' disabled')+'>Salin senarai</button>'+
+    '<button type="button" class="btn primary" data-rs="rekod"'+(jumQ ? '' : ' disabled')+'>Rekod restock ('+jumQ+' unit)</button><div class="err" id="errRs" style="flex-basis:100%"></div></div>';
+}
+async function aksiRestock(b){
+  const R = S.rs, k = b.dataset.rs, err = $('#errRs'); if (err) err.textContent = '';
+  if (k === 'tapis') { R.tapis = b.dataset.v; render(); return; }
+  if (k === 'had') {
+    const senarai = Object.keys(R.had).map(id => ({ id, had: String(R.had[id]).trim() }));
+    b.disabled = true; b.textContent = 'Menyimpan…';
+    try { S.d = await api('simpanHadRak', S.token, senarai); R.had = {}; render(); toast('Had rak disimpan'); }
+    catch (e) { if (sesiTamat(e)) return logKeluar(); if (err) err.textContent = mesejRalat(e); b.disabled = false; b.textContent = 'Simpan had rak'; }
+    return;
+  }
+  if (k === 'salin') {
+    const baris = senaraiKp().map(i => Object.assign({ i }, infoRestock(i))).filter(x => x.cad > 0);
+    const hari = new Date(); const tarikh = hari.getDate() + ' ' + BULAN[hari.getMonth()] + ' ' + hari.getFullYear();
+    let kat = null; const teks = ['*Senarai restock rak · ' + tarikh + '*'];
+    baris.forEach(x => { if (x.i.kategori !== kat) { kat = x.i.kategori; teks.push('', '*' + kat + '*'); } teks.push('• ' + x.i.nama + ': +' + x.cad + ' ' + x.i.unit + ' (rak ' + x.rak + '/' + x.had + ')' + (x.kurang ? ' ⚠ stor kurang ' + x.kurang : '')); });
+    teks.push('', 'Jumlah: ' + baris.reduce((a, x) => a + x.cad, 0) + ' unit, ' + baris.length + ' item');
+    const t = teks.join('\n');
+    try { await navigator.clipboard.writeText(t); toast('Senarai disalin. Tampal dalam WhatsApp kumpulan JPP.'); }
+    catch (e) { bukaDlg('<div class="dlg-head"><h2>Senarai restock</h2><p>Salin teks di bawah</p></div><div class="dlg-body"><textarea rows="14" readonly style="font-family:var(--body)">'+esc(t)+'</textarea></div><div class="dlg-foot"><div class="right"><button class="btn primary" data-close>Tutup</button></div></div>'); }
+    return;
+  }
+  if (k === 'rekod') {
+    const baris = senaraiKp().map(i => Object.assign({ i }, infoRestock(i))).filter(x => x.q > 0);
+    const salah = baris.filter(x => x.q > x.kotak);
+    if (salah.length) { err.textContent = salah.map(x => x.i.nama + ': dalam kotak hanya ' + x.kotak).join(' · '); return; }
+    b.disabled = true; b.textContent = 'Merekod…';
+    try {
+      const r = await api('restockRak', S.token, baris.map(x => ({ id: x.i.id, qty: x.q })), ($('#rsNota') || {}).value || R.nota);
+      S.d = r.data; R.qty = {}; render(); toast(r.jumlah + ' unit (' + r.bil + ' item) dipindah ke rak');
+    } catch (e) { if (sesiTamat(e)) return logKeluar(); if (err) err.textContent = mesejRalat(e); b.disabled = false; b.textContent = 'Rekod restock'; }
+  }
 }
 
 /* ---------- BATCH & FEFO ---------- */
@@ -2084,6 +2185,7 @@ $('#main').addEventListener('click', e => {
   const sah = e.target.closest('[data-sah]'); if (sah) { const a = S.d.urus.ambilan.find(x => x.id === sah.dataset.sah); if (a) bukaSahkanKiosk(a); return; }
   const kpa = e.target.closest('[data-kpa]'); if (kpa) { aksiKiraan(kpa); return; }
   const bta = e.target.closest('[data-bt]'); if (bta) { aksiBatch(bta); return; }
+  const rsa = e.target.closest('[data-rs]'); if (rsa) { aksiRestock(rsa); return; }
   const lh = e.target.closest('[data-lhari]'); if (lh) { S.lap.hari = Number(lh.dataset.lhari); render(); return; }
   const lm = e.target.closest('[data-lmuat]'); if (lm) { muatLaporan(); return; }
   const sa = e.target.closest('[data-sa]'); if (sa) { aksiSuhu(sa); return; }
@@ -2102,10 +2204,13 @@ $('#main').addEventListener('input', e => {
   if (S.mode !== 'staf') return;
   if (S.tab === 'tetapan') { kemasTed(e.target); return; }
   if (e.target.dataset.kp) { kemasKiraan(e.target); return; }
+  if (e.target.dataset.rh != null) { S.rs.had[e.target.dataset.rh] = e.target.value; return; }
+  if (e.target.dataset.rq != null) { S.rs.qty[e.target.dataset.rq] = e.target.value; return; }
   if (S.tab === 'suhu' && kemasSuhu(e.target)) return;
   const id = e.target.id;
   if (id === 'kpNota') { S.kp.nota = e.target.value; simpanDraf(); return; }
   if (id === 'smNota') { S.meal.nota = e.target.value; return; }
+  if (id === 'rsNota') { S.rs.nota = e.target.value; return; }
   if (id === 'sQ') S.stok.q = e.target.value; else if (id === 'aQ') S.amb.q = e.target.value; else if (id === 'pQ') S.pel.q = e.target.value; else if (id === 'kpQ') S.kp.q = e.target.value; else if (id === 'btQ') S.bt.q = e.target.value; else return;
   clearTimeout(S.tq); S.tq = setTimeout(render, 150);
 });
@@ -2116,6 +2221,7 @@ $('#main').addEventListener('change', e => {
   if (e.target.id === 'sCat') { S.stok.cat = e.target.value; render(); }
   if (e.target.id === 'sSt') { S.stok.st = e.target.value; render(); }
   if (e.target.id === 'kpKat') { S.kp.cat = e.target.value; render(); }
+  if (S.tab === 'restock' && (e.target.dataset.rh != null || e.target.dataset.rq != null)) { render(); return; }
   if (e.target.id === 'kpTapis') { S.kp.tapis = e.target.value; render(); }
 });
 $('#main').addEventListener('keydown', e => {
@@ -2292,6 +2398,7 @@ function bukaItem(i){
     '<div class="field"><label for="iM">Stok minimum</label><input id="iM" type="number" min="0" step="1" inputmode="numeric" value="'+(i.min != null ? i.min : '')+'" placeholder="Contoh: 20"></div>'+
     '<div class="field"><label for="iL">Lokasi</label><input id="iL" maxlength="40" value="'+esc(i.lokasi || '')+'" placeholder="Rak A, Peti sejuk"></div>'+
     '<div class="field"><label for="iX">Tarikh luput terdekat</label><input id="iX" type="date" value="'+esc(i.luput || '')+'"></div>'+
+    '<div class="field"><label for="iH">Had rak (maksimum dipamerkan)</label><input id="iH" type="number" min="1" step="1" inputmode="numeric" value="'+(i.hadRak || '')+'" placeholder="Kosongkan jika tiada had"><span class="hint">Digunakan untuk cadangan restock rak.</span></div>'+
     '<div class="field"><label for="iD">Unit dikira 1 item</label><input id="iD" type="number" min="1" max="20" step="1" inputmode="numeric" value="'+(i.dikiraSendiri ? i.dikira : '')+'" placeholder="'+(i.dikira ? 'Asal: '+i.dikira : 'Asal: 1')+'"><span class="hint">Cth: 2 = dua paket dikira satu item. Kosongkan untuk nilai asal.</span></div>'+
     (baru ? '<div class="field"><label for="iS">Stok awal (pilihan)</label><input id="iS" type="number" min="0" step="1" inputmode="numeric" placeholder="Kosongkan jika belum dikira"></div>' : '')+
     '</div><div class="err" id="iE"></div></div>'+
@@ -2301,7 +2408,7 @@ function bukaItem(i){
     aksiStaf('padamItem', [i.id], del, $('#iE'), i.nama+' dipadam'); }; }
   $('#fIt').addEventListener('submit', ev => { ev.preventDefault();
     const nama = $('#iN').value.trim(); if (!nama) { $('#iE').textContent = 'Nama item diperlukan.'; return; }
-    aksiStaf('simpanItem', [{ id: i.id || null, nama, kategori: $('#iK').value, unit: $('#iU').value.trim() || 'unit', min: $('#iM').value, lokasi: $('#iL').value.trim(), luput: $('#iX').value, dikira: $('#iD').value.trim(), stokAwal: baru ? $('#iS').value : undefined }],
+    aksiStaf('simpanItem', [{ id: i.id || null, nama, kategori: $('#iK').value, unit: $('#iU').value.trim() || 'unit', min: $('#iM').value, lokasi: $('#iL').value.trim(), luput: $('#iX').value, dikira: $('#iD').value.trim(), hadRak: $('#iH').value.trim(), stokAwal: baru ? $('#iS').value : undefined }],
       $('#iGo'), $('#iE'), baru ? nama+' ditambah' : nama+' dikemas kini');
   });
 }
