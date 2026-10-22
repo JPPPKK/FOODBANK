@@ -307,9 +307,13 @@ button.tile:hover{border-color:var(--muted)}
 .kp-prog b{font-family:var(--display);font-size:22px;color:var(--ink)}
 .kp-cat{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 16px;background:var(--sunk);border-top:1px solid var(--line);font-weight:700;font-size:14px}
 .kp-cat span{font-weight:600;font-size:13px;color:var(--muted)}
-.kp-in{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.kp-in{display:grid;grid-template-columns:1fr 1fr;gap:4px 6px}
+.kp-in label{display:flex;flex-direction:column;gap:2px;font-size:11px;font-weight:600;color:var(--muted)}
+.kp-f{grid-column:1/-1;font-size:12px;color:var(--muted);min-height:16px}
+.kp-f i{font-style:normal;color:var(--warn);font-weight:600}
+.kp-f.ragu{color:var(--crit);font-weight:700}
 .kp-sis span{font-size:12px}
-.kp-row{display:grid;grid-template-columns:minmax(0,1fr) 110px 180px 64px;gap:10px;align-items:center;padding:10px 16px;border-top:1px solid var(--line)}
+.kp-row{display:grid;grid-template-columns:minmax(0,1fr) 110px 230px 64px;gap:10px;align-items:center;padding:10px 16px;border-top:1px solid var(--line)}
 .kp-row.dikira{background:color-mix(in srgb,var(--ok) 5%,var(--surface))}
 .kp-sis{text-align:right;font-size:13px;color:var(--muted)}
 .kp-sis b{display:block;font-family:var(--display);font-size:22px;color:var(--ink);line-height:1}
@@ -1451,6 +1455,19 @@ function fizikalKp(i){
   const kot = k == null || k === '' ? sistemKotakKp(i) : Number(k);
   return rak + kot;
 }
+/** "Rak 20 + Kotak 140 (sistem) = 160" — tunjuk angka yang akan digunakan bila satu lajur kosong */
+function formulaKp(i){
+  const r = S.kp.rak[i.id], k = S.kp.kotak[i.id];
+  if ((r == null || r === '') && (k == null || k === '')) return '';
+  const rs = r == null || r === '', ks = k == null || k === '';
+  const rak = rs ? Math.max(0, sistemKp(i) - sistemKotakKp(i)) : Number(r), kot = ks ? sistemKotakKp(i) : Number(k);
+  return 'Rak ' + rak + (rs ? ' <i>(sistem)</i>' : '') + ' + Kotak ' + kot + (ks ? ' <i>(sistem)</i>' : '') + ' = <b>' + (rak + kot) + '</b>' + (raguKp(i) ? ' · semak: jumlah penuh diisi dalam Rak?' : '');
+}
+/** Kemungkinan jumlah penuh diisi dalam lajur Rak sedangkan Kotak kosong (angka kotak sistem ditambah sekali lagi) */
+function raguKp(i){
+  const r = S.kp.rak[i.id], k = S.kp.kotak[i.id], sk = sistemKotakKp(i);
+  return r != null && r !== '' && (k == null || k === '') && sk > 0 && Number(r) >= sistemKp(i) * 0.8;
+}
 function bezaKp(i){
   const f = fizikalKp(i);
   if (f == null) return { cls:'kosong', t:'–', n:null };
@@ -1484,13 +1501,14 @@ function stafKiraan(u){
     const b = bezaKp(i), v = K.rak[i.id], vk = K.kotak[i.id], sk = sistemKotakKp(i);
     rows += '<li class="kp-row'+(b.n != null ? ' dikira' : '')+'" data-kprow="'+esc(i.id)+'"><div class="row-main"><div class="row-t">'+esc(i.nama)+'</div><div class="row-m">'+(i.lokasi ? '<span class="shelf">'+esc(i.lokasi)+'</span>' : '')+'</div></div>'+
       '<div class="kp-sis">Sistem <b>'+(i.stok == null && K.lihat[i.id] == null ? '–' : sistemKp(i))+'</b> '+esc(i.unit)+(sk ? '<br><span>rak '+Math.max(0, sistemKp(i) - sk)+' · kotak '+sk+'</span>' : '')+'</div>'+
-      '<div class="kp-in"><input id="kp-'+esc(i.id)+'" data-kp="'+esc(i.id)+'" data-kpj="rak" type="number" min="0" step="1" inputmode="numeric" enterkeyhint="next" placeholder="Rak" aria-label="Jumlah '+esc(i.nama)+' di rak atau chiller" value="'+esc(v == null ? '' : v)+'">'+
-      '<input id="kpk-'+esc(i.id)+'" data-kp="'+esc(i.id)+'" data-kpj="kotak" type="number" min="0" step="1" inputmode="numeric" enterkeyhint="next" placeholder="Kotak" aria-label="Jumlah '+esc(i.nama)+' dalam kotak atau stor" value="'+esc(vk == null ? '' : vk)+'"></div>'+
+      '<div class="kp-in"><label>Unit di rak<input id="kp-'+esc(i.id)+'" data-kp="'+esc(i.id)+'" data-kpj="rak" type="number" min="0" step="1" inputmode="numeric" enterkeyhint="next" placeholder="'+esc(i.unit)+'" aria-label="Unit '+esc(i.nama)+' di rak atau chiller" value="'+esc(v == null ? '' : v)+'"></label>'+
+      '<label>Unit dlm kotak<input id="kpk-'+esc(i.id)+'" data-kp="'+esc(i.id)+'" data-kpj="kotak" type="number" min="0" step="1" inputmode="numeric" enterkeyhint="next" placeholder="'+esc(i.unit)+'" aria-label="Unit '+esc(i.nama)+' dalam kotak atau stor (bukan bilangan kotak)" value="'+esc(vk == null ? '' : vk)+'"></label>'+
+      '<div class="kp-f'+(raguKp(i) ? ' ragu' : '')+'" data-kpf="'+esc(i.id)+'">'+formulaKp(i)+'</div></div>'+
       '<div class="kp-beza '+b.cls+'" data-kpb="'+esc(i.id)+'">'+b.t+'</div></li>';
   });
   const sej = u.kiraan || [];
   return '<section class="panel"><div class="panel-head"><h3>Kiraan stok</h3><span>Semak rak dan chiller sebelum restock</span></div><div class="panel-body">'+
-    '<p style="margin:0;color:var(--muted);font-size:14px">Kira barang sebenar dan isi jumlahnya dalam dua lajur: <b>Rak</b> (dipamerkan di rak/chiller) dan <b>Kotak</b> (belum dikeluarkan dari kotak/stor). Jika satu lajur dibiarkan kosong, angka sistem untuk lokasi itu digunakan. Biarkan kedua-duanya kosong untuk item yang tidak dikira. Beza dipaparkan serta-merta, dan stok sistem dikemas kini apabila anda tekan <b>Simpan kiraan</b>. Jika ada ambilan berlaku semasa anda mengira, sistem akan mengambil kiranya secara automatik.</p>'+
+    '<p style="margin:0;color:var(--muted);font-size:14px">Kira barang sebenar dan isi <b>bilangan unit</b> (paket, botol, sachet…) dalam dua lajur: <b>Unit di rak</b> (dipamerkan di rak/chiller) dan <b>Unit dlm kotak</b> (belum dikeluarkan dari kotak/stor, <b>bukan bilangan kotak</b>). Isi <b>0</b> jika tiada. Lajur yang dibiarkan kosong akan guna angka sistem (ditanda "(sistem)"). Biarkan kedua-duanya kosong untuk item yang tidak dikira. Beza dipaparkan serta-merta, dan stok sistem dikemas kini apabila anda tekan <b>Simpan kiraan</b>. Jika ada ambilan berlaku semasa anda mengira, sistem akan mengambil kiranya secara automatik.</p>'+
     (K.draf ? '<div class="banner">Draf kiraan dari '+esc(masa(new Date(K.draf).toISOString()))+' dipulihkan dari peranti ini.</div>' : '')+
     '<div class="kp-head"><div class="kp-prog" id="kpProg">'+progKp()+'</div></div>'+
     '<div class="toolbar"><div class="field search"><label for="kpQ">Cari</label><input id="kpQ" type="search" value="'+esc(K.q)+'" placeholder="Nama item atau lokasi"></div>'+
@@ -1512,6 +1530,7 @@ function kemasKiraan(el){
   else tmp[id] = String(Math.max(0, Math.floor(Number(v))));
   if (S.kp.rak[id] == null && S.kp.kotak[id] == null) { delete S.kp.lihat[id]; delete S.kp.lihatKotak[id]; }
   else if (S.kp.lihat[id] == null) { S.kp.lihat[id] = i.stok || 0; S.kp.lihatKotak[id] = i.kotak || 0; }
+  const fx = document.querySelector('[data-kpf="'+id+'"]'); if (fx) { fx.innerHTML = formulaKp(i); fx.className = 'kp-f' + (raguKp(i) ? ' ragu' : ''); }
   const b = bezaKp(i), cell = document.querySelector('[data-kpb="'+id+'"]');
   if (cell) { cell.className = 'kp-beza ' + b.cls; cell.textContent = b.t; }
   const row = document.querySelector('[data-kprow="'+id+'"]'); if (row) row.classList.toggle('dikira', b.n != null);
@@ -1531,6 +1550,23 @@ async function aksiKiraan(b){
     const senarai = ids.map(id => ({ id, rak: K.rak[id] == null ? '' : Number(K.rak[id]), kotak: K.kotak[id] == null ? '' : Number(K.kotak[id]), dilihat: K.lihat[id], dilihatKotak: K.lihatKotak[id] }));
     const err = $('#errKp');
     if (!senarai.length) { err.textContent = 'Isi jumlah di rak atau dalam kotak untuk sekurang-kurangnya satu item.'; return; }
+    if (!b.dataset.paksa) {
+      const syak = ids.map(id => S.d.stok.find(i => i.id === id)).filter(Boolean).map(i => {
+        const n = bezaKp(i).n, sis = sistemKp(i);
+        const sebab = raguKp(i) ? 'Lajur Kotak kosong, jadi ' + sistemKotakKp(i) + ' unit kotak dari sistem ditambah. Jika jumlah penuh diisi dalam Rak, isi lajur Kotak (atau 0).'
+          : (n != null && i.stok != null && Math.abs(n) >= 10 && Math.abs(n) >= 0.3 * Math.max(sis, 1)) ? 'Beza besar berbanding sistem. Pastikan lajur Kotak berisi bilangan unit, bukan bilangan kotak.' : '';
+        return sebab ? { i, n, sis, f: fizikalKp(i), sebab } : null;
+      }).filter(Boolean);
+      if (syak.length) {
+        bukaDlg('<div class="dlg-head"><h2>Semak sebelum simpan</h2><p>'+syak.length+' item mungkin tersilap isi</p></div><div class="dlg-body flush" style="padding:0 18px">'+
+          syak.map(x => '<div style="padding:10px 0;border-top:1px solid var(--line)"><div style="display:flex;justify-content:space-between;gap:8px"><b>'+esc(x.i.nama)+'</b><span class="kp-beza '+(x.n < 0 ? 'kurang' : 'lebih')+'" style="padding:0 8px">'+(x.n > 0 ? '+' : '−')+Math.abs(x.n)+'</span></div>'+
+            '<div class="hint">Sistem '+x.sis+' → dikira '+x.f+' '+esc(x.i.unit)+' ('+formulaKp(x.i).replace(/ · semak:.*$/, '')+')</div><div class="hint" style="color:var(--warn)">'+esc(x.sebab)+'</div></div>').join('')+'</div>'+
+          '<div class="dlg-foot"><div class="right"><button type="button" class="btn primary" data-close>← Semak semula</button><button type="button" class="btn" id="kpPaksa">Simpan juga</button></div></div>');
+        $('#kpPaksa').onclick = () => { tutupDlg(); const sb = document.querySelector('[data-kpa="simpan"]'); if (sb) { sb.dataset.paksa = '1'; aksiKiraan(sb); } };
+        return;
+      }
+    }
+    delete b.dataset.paksa;
     b.disabled = true; b.textContent = 'Menyimpan…'; err.textContent = '';
     try {
       const r = await api('kiraanPukal', S.token, senarai, ($('#kpNota') || {}).value || K.nota);
