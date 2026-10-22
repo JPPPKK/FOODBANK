@@ -183,6 +183,11 @@ textarea{resize:vertical;min-height:64px}
 .cartbar .count{font-family:var(--display);font-weight:800;font-size:28px;line-height:1}
 .cartbar .count small{font-family:var(--body);font-size:13px;font-weight:500;color:var(--navy-muted);display:block}
 .cartbar .full{color:var(--yellow)}
+.cartbar .count small.lagi{color:var(--yellow);font-weight:700}
+.ingat{border-radius:10px;padding:12px 14px;background:var(--warn-bg);color:var(--warn);font-size:14px;display:flex;flex-direction:column;gap:6px;border:1px solid color-mix(in srgb,var(--warn) 30%,transparent)}
+.ingat b.t{font-size:15px}
+.ingat ul{margin:0;padding-left:18px}
+.ingat-r{font-size:13px;font-weight:700;color:var(--warn)}
 
 /* ---------- Rows ---------- */
 .row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
@@ -324,7 +329,7 @@ button.tile:hover{border-color:var(--muted)}
 .lap-cat li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;padding:7px 12px;border-top:1px solid var(--line);font-size:14px;align-items:center}
 .lap-cat ul{list-style:none;margin:0;padding:0}
 .lap-tukar{font-size:12px;font-weight:600;color:var(--warn);padding:6px 12px;background:var(--warn-bg)}
-.lt.masuk{color:var(--ok)} .lt.keluar,.lt.ambilan,.lt.padam,.lt.staf{color:var(--crit)} .lt.pindah{color:var(--muted)} .lt.kiraan{color:var(--blue)}
+.lt.masuk{color:var(--ok)} .lt.keluar,.lt.ambilan,.lt.padam,.lt.staf{color:var(--crit)} .lt.pindah{color:var(--muted)} .lt.pulang{color:var(--ok)} .lt.kiraan{color:var(--blue)}
 .split{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
 
 /* ---------- Dialog ---------- */
@@ -356,6 +361,13 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
 .receipt .sum{width:100%;text-align:left;margin-top:8px}
 .receipt .note{background:var(--yellow);color:var(--on-yellow);font-weight:700;border-radius:8px;padding:10px 12px;width:100%;margin-top:8px}
 
+.live{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:65;width:min(360px,calc(100vw - 32px));background:var(--surface);color:var(--ink);border:1px solid var(--line);border-left:6px solid var(--yellow);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.25);padding:14px 16px;display:flex;flex-direction:column;gap:8px;animation:liveMasuk .25s ease-out}
+@keyframes liveMasuk{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+.live h4{margin:0;font-size:15px;display:flex;align-items:center;gap:8px}
+.live p{margin:0;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.live p b{color:var(--ink)}
+.live .acts{display:flex;gap:8px;justify-content:flex-end}
+.notif-on{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:8px;font-weight:600;font-size:14px;max-width:calc(100vw - 32px);z-index:60;text-align:center}
 
 /* ---------- Tema, pengumuman, tetapan ---------- */
@@ -538,6 +550,7 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
   <div class="loadbar" aria-hidden="true"></div>
   <div class="load-msg" id="loadMsg">Menyemak rekod anda…</div>
   <button class="btn primary" id="btnCubaLagi" hidden>Cuba lagi</button>
+  <button class="btn" id="btnLogSemula" hidden style="margin-top:8px">Log masuk semula</button>
 </section>
 
 <!-- ============ APLIKASI ============ -->
@@ -571,6 +584,7 @@ dialog::backdrop{background:rgba(10,18,36,.6)}
 <div id="vizTip" role="status" hidden></div>
 <input type="file" id="fileGambar" accept="image/png,image/jpeg,image/webp" hidden>
 <div class="toast" id="toast" hidden></div>
+<div class="live" id="liveBar" role="alert" hidden></div>
 
 <script>
 const LOGO_JPP = [
@@ -902,8 +916,16 @@ function api(fn, ...args){
   if (!ADA_GAS && ADA_API) {
     // Tanpa cookie: Google tidak tahu akaun mana yang log masuk, jadi tiada ralat /u/1/
     return fetch(API_URL, { method:'POST', credentials:'omit', redirect:'follow', headers:{ 'Content-Type':'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) })
-      .then(r => { if (!r.ok) throw new Error('Pelayan tidak dapat dihubungi (' + r.status + '). Cuba lagi.'); return r.json(); })
-      .catch(e => { throw new Error(e && /Pelayan/.test(e.message) ? e.message : 'Tiada sambungan ke pelayan. Semak internet anda dan cuba lagi.'); })
+      .catch(e => { console.error('[FoodBank] fetch gagal:', fn, e); throw new Error('Tiada sambungan ke pelayan. Semak internet anda, atau cuba tetingkap Incognito (sambungan mungkin disekat oleh sambungan pelayar / rangkaian). [' + fn + ']'); })
+      .then(r => r.text().then(t => {
+        if (!r.ok) throw new Error('Pelayan tidak dapat dihubungi (' + r.status + '). Cuba lagi.');
+        try { return JSON.parse(t); }
+        catch (x) {
+          const teks = t.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
+          console.error('[FoodBank] jawapan bukan JSON:', fn, t.slice(0, 500));
+          throw new Error('Pelayan Apps Script memulangkan ralat: ' + (teks || 'halaman kosong') + ' [' + fn + ']');
+        }
+      }))
       .then(j => { if (!j || !j.ok) throw new Error((j && j.err) || 'Ralat tidak dijangka.'); return j.res; });
   }
   return new Promise((res, rej) => {
@@ -975,6 +997,7 @@ $('#fKod').addEventListener('submit', async e => {
 
 function logKeluar(){
   simpanToken(null); S.token = null; S.d = null; S.pick = {};
+  if (typeof LV !== 'undefined') { LV.versi = ''; LV.kenal = null; LV.saya = null; document.title = tajukAsal(); const lb = $('#liveBar'); if (lb) lb.hidden = true; }
   $('#fKod').hidden = true; $('#fEmail').hidden = false; $('#inEmail').value = '';
   tunjuk('#scrLogin');
 }
@@ -984,7 +1007,7 @@ $('#btnKeluar').onclick = logKeluar;
    MEMUATKAN
    ===================================================================== */
 async function muat(skrinPenuh){
-  if (skrinPenuh) { tunjuk('#scrLoad'); $('#loadMsg').textContent = 'Menyemak rekod anda…'; $('#btnCubaLagi').hidden = true; }
+  if (skrinPenuh) { tunjuk('#scrLoad'); $('#loadMsg').textContent = 'Menyemak rekod anda…'; $('#btnCubaLagi').hidden = true; $('#btnLogSemula').hidden = true; }
   const t0 = Date.now();
   try {
     const d = await api('muatData', S.token);
@@ -992,11 +1015,12 @@ async function muat(skrinPenuh){
     pasangData(d, skrinPenuh);
   } catch(e){
     if (sesiTamat(e)) { logKeluar(); $('#errEmail').textContent = mesejRalat(e); return; }
-    if (skrinPenuh) { $('#loadMsg').textContent = mesejRalat(e); $('#btnCubaLagi').hidden = false; }
+    if (skrinPenuh) { $('#loadMsg').textContent = mesejRalat(e); $('#btnCubaLagi').hidden = false; $('#btnLogSemula').hidden = false; }
     else toast(mesejRalat(e));
   }
 }
 $('#btnCubaLagi').onclick = () => muat(true);
+$('#btnLogSemula').onclick = () => logKeluar();
 $('#btnRefresh').onclick = async () => { const b = $('#btnRefresh'); b.disabled = true; b.textContent = 'Memuat…'; await muat(false); b.disabled = false; b.textContent = 'Muat semula'; toast('Data dikemas kini'); };
 document.addEventListener('visibilitychange', () => { if (!document.hidden && S.d && S.token && !$('#dlg').open) muat(false); });
 
@@ -1136,14 +1160,50 @@ $('#main').addEventListener('click', e => {
     kemasCart();
   }
 });
+// Berapa item lagi yang masih boleh dipilih (ikut had keseluruhan, had kategori dan stok)
+function jumlahKira(p, stok){ return Object.values(kiraanKat(p, stok)).reduce((x, n) => x + n, 0); }
+function stokBolehPilih(stok){ return (stok || S.d.stok).filter(i => (i.stok || 0) > 0 && hadKat(i.kategori).papar !== false && hadKat(i.kategori).had !== 0); }
+function bakiBoleh(pick, stok, had){
+  stok = stokBolehPilih(stok);
+  const cuba = Object.assign({}, pick), asal = jumlahKira(cuba, stok), kat = [];
+  for (let g = 0; g < 60; g++) {
+    const kini = jumlahKira(cuba, stok);
+    const i = stok.find(x => bolehTambah(cuba, stok, x, had) && jumlahKira(Object.assign({}, cuba, { [x.id]: (cuba[x.id] || 0) + 1 }), stok) > kini);
+    if (!i) break;
+    cuba[i.id] = (cuba[i.id] || 0) + 1;
+    if (kat.indexOf(i.kategori) < 0) kat.push(i.kategori);
+  }
+  // Unit "percuma": kategori yang dikira berpasangan (cth: 2 paket Maggi = 1 item) tetapi baru dipilih 1 unit
+  const percuma = [];
+  const mentah = {};
+  Object.keys(pick).forEach(id => { const i = stok.find(x => String(x.id) === String(id)); if (i) mentah[i.kategori] = (mentah[i.kategori] || 0) + pick[id] / dikiraBarang(i); });
+  Object.keys(mentah).forEach(k => {
+    const sisa = Math.ceil(mentah[k] - 1e-9) - mentah[k];
+    if (sisa < 1e-9) return;
+    const i = stok.find(x => x.kategori === k && bolehTambah(pick, stok, x, had) && jumlahKira(Object.assign({}, pick, { [x.id]: (pick[x.id] || 0) + 1 }), stok) === jumlahKira(pick, stok));
+    if (i) percuma.push({ kategori: k, unit: Math.round(sisa * dikiraBarang(i)), nama: i.unit, dikira: dikiraBarang(i) });
+  });
+  const semuaKat = [];
+  stok.forEach(x => { if (semuaKat.indexOf(x.kategori) < 0 && bolehTambah(pick, stok, x, had) && jumlahKira(Object.assign({}, pick, { [x.id]: (pick[x.id] || 0) + 1 }), stok) > asal) semuaKat.push(x.kategori); });
+  return { lagi: jumlahKira(cuba, stok) - asal, kategori: semuaKat.length ? semuaKat : kat, percuma };
+}
+function ingatHtml(b, had){
+  if (!b.lagi && !b.percuma.length) return '';
+  return '<div class="ingat" role="status"><b class="t">⚠ '+(b.lagi ? 'Anda masih boleh ambil '+b.lagi+' item lagi' : 'Anda masih boleh ambil barang percuma')+'</b>'+
+    '<ul>'+(b.lagi ? '<li>Kategori yang masih boleh dipilih: <b>'+b.kategori.map(esc).join(', ')+'</b></li>' : '')+
+    b.percuma.map(p => '<li><b>'+esc(p.kategori)+'</b>: tambah '+p.unit+' '+esc(p.nama)+' lagi tanpa menambah kiraan item ('+p.dikira+' '+esc(p.nama)+' = 1 item)</li>').join('')+'</ul>'+
+    '<span>Tekan "Pilih lagi" untuk menambah barang supaya anda tidak rugi.</span></div>';
+}
 function kemasCart(){
   const bar = $('#cartbar');
   if (S.mode !== 'pelajar' || !S.d.saya.profil || !S.d.kelayakan.boleh || !S.d.stok.length || (S.d.awam && S.d.awam.terima === false)) { bar.hidden = true; return; }
   const n = jumlahPick(S.pick), had = S.d.kelayakan.hadItem, buka = S.d.kiosk.buka;
   bar.hidden = false;
+  const bk = n > 0 ? bakiBoleh(S.pick, S.d.stok, had) : null;
+  const nota = bk && bk.lagi ? '<small class="lagi">Boleh tambah '+bk.lagi+' item lagi</small>' : bk && bk.percuma.length ? '<small class="lagi">+ '+bk.percuma.map(p => p.unit+' '+p.nama+' '+p.kategori).join(', ')+' percuma</small>' : '';
   $('#cartCount').innerHTML = had > 0
-    ? '<span class="'+(n >= had ? 'full' : '')+'">'+n+' / '+had+'</span><small>'+(n >= had ? 'Had item dicapai' : 'item dipilih')+'</small>'
-    : '<span>'+n+'</span><small>item dipilih</small>';
+    ? '<span class="'+(n >= had ? 'full' : '')+'">'+n+' / '+had+'</span>'+(nota || '<small>'+(n >= had ? 'Had item dicapai' : 'item dipilih')+'</small>')
+    : '<span>'+n+'</span>'+(nota || '<small>item dipilih</small>');
   const b = $('#btnTeruskan'); b.disabled = n === 0 || !buka; b.textContent = buka ? 'Teruskan' : 'Kiosk tutup';
 }
 $('#btnTeruskan').onclick = () => bukaSahkan(null);
@@ -1156,11 +1216,15 @@ function bukaSahkan(pelajar){
   // pelajar = null (diri sendiri) atau objek pelajar (staf rekod bagi pihak)
   const pick = pelajar ? pelajar.pick : S.pick;
   const n = jumlahPick(pick);
+  const had = pelajar ? S.d.tetapan.hadItem : S.d.kelayakan.hadItem;
+  const bk = bakiBoleh(pick, S.d.stok, had), ingat = ingatHtml(bk, had);
   bukaDlg('<form id="fSah" novalidate><div class="dlg-head"><h2>Sahkan ambilan</h2><p>'+(pelajar ? 'Bagi pihak '+esc(pelajar.nama || pelajar.email) : esc(S.d.saya.profil.nama)+' · '+esc(S.d.saya.profil.matriks))+'</p></div>'+
-    '<div class="dlg-body"><ul class="sum">'+ringkasPilihan(S.d.stok, pick)+'<li><span><strong>Jumlah</strong></span><b>'+n+' item</b></li></ul>'+
+    '<div class="dlg-body">'+ingat+'<ul class="sum">'+ringkasPilihan(S.d.stok, pick)+'<li><span><strong>Jumlah</strong></span><b>'+n+(had > 0 ? ' / '+had : '')+' item</b></li></ul>'+
     '<div class="field"><label for="inUlasan">Ulasan dan cadangan (pilihan)</label><textarea id="inUlasan" maxlength="500" placeholder="Contoh: Terima kasih JPP! Harap ada roti juga."></textarea></div>'+
     '<div class="err" id="errSah"></div></div>'+
-    '<div class="dlg-foot"><div class="right"><button type="button" class="btn" data-close>Kembali</button><button type="submit" class="btn primary" id="btnSah">Sahkan ambilan</button></div></div></form>');
+    '<div class="dlg-foot"><div class="right">'+(ingat ? '<button type="button" class="btn primary" id="btnPilihLagi">← Pilih lagi</button><button type="submit" class="btn" id="btnSah">Sahkan juga</button>' : '<button type="button" class="btn" data-close>Kembali</button><button type="submit" class="btn primary" id="btnSah">Sahkan ambilan</button>')+'</div></div></form>');
+  const pl = $('#btnPilihLagi');
+  if (pl) pl.onclick = () => { if (pelajar) bukaBagiPihakSemula(pelajar); else { tutupDlg(); const k = document.getElementById('picker'); if (k) k.scrollIntoView({ behavior: 'smooth', block: 'start' }); } };
   $('#fSah').addEventListener('submit', async ev => {
     ev.preventDefault();
     const b = $('#btnSah'); b.disabled = true; b.textContent = 'Merekod…'; $('#errSah').textContent = '';
@@ -1184,7 +1248,11 @@ function tunjukResit(r, bagiPihak){
     '<div class="hint mono-s" style="font-size:14px">ID '+esc(r.id)+'</div>'+
     (bagiPihak || r.status === 'Diambil' ? '<span class="resit-st st-sah">✓ Disahkan oleh petugas</span>' : '<span class="resit-st st-menunggu">Menunggu pengesahan petugas</span>')+
     (bagiPihak || !(S.d.awam && S.d.awam.mesejResit) ? '' : '<div class="note">'+esc(S.d.awam.mesejResit)+'</div>')+
-    '</div><div class="dlg-foot"><div class="right"><button class="btn primary" data-close>Selesai</button></div></div>');
+    '<div class="err" id="errResit"></div></div><div class="dlg-foot">'+
+    (!bagiPihak && r.status !== 'Diambil' && r.id && kunciDari(new Date(r.masa)) === kunciDari(new Date()) ? '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="btnUbahR">Ubah barang</button><button type="button" class="btn danger" id="btnBatalR">Batal</button></div>' : '')+
+    '<div class="right"><button class="btn primary" data-close>Selesai</button></div></div>');
+  const u = $('#btnUbahR'); if (u) u.onclick = () => bukaUbahAmbilan(r.id, false);
+  const b = $('#btnBatalR'); if (b) b.onclick = () => bukaBatalAmbilan(r.id, false);
 }
 
 function renderProfil(){
@@ -1246,7 +1314,7 @@ function stafRingkasan(u){
   const tunggu = u.menungguHariIni ? '<div class="banner banner-row"><span><b>'+u.menungguHariIni+' ambilan hari ini</b> belum disahkan di kiosk. Semak barang pelajar sama seperti resit.</span><button class="btn" data-goto="ambilan" data-src-goto="Menunggu">Semak sekarang</button></div>' : '';
   const su = (u.suhu && u.suhu.sesi) || [];
   const ingat = su.filter(x => x.perluBuka || x.perluTutup).map(x => '<div class="banner banner-row"><span><b>Rekod suhu '+(x.perluBuka ? 'buka' : 'tutup')+'</b> untuk sesi '+esc(x.label)+' belum dibuat.</span><button class="btn" data-goto="suhu">Rekod sekarang</button></div>').join('');
-  return ingat + tunggu + '<section class="tiles">'+
+  return notifHtml() + ingat + tunggu + '<section class="tiles">'+
     '<div class="tile"><span class="n">'+r.ambilanHariIni+'</span><span class="l">Ambilan hari ini</span></div>'+
     '<div class="tile"><span class="n">'+r.itemKeluarHariIni+'</span><span class="l">Item keluar hari ini</span></div>'+
     '<button class="tile crit" data-goto="stok" data-st="perhatian"><span class="n">'+(habis + rendah)+'</span><span class="l">Habis / stok rendah</span></button>'+
@@ -1310,13 +1378,54 @@ function bukaSahkanKiosk(a){
     '<div class="banner">Semak barang di tangan pelajar <b>sama seperti senarai ini, termasuk perisa dan jenis</b>. Jika berbeza, minta pelajar tukar mengikut resit sebelum sahkan.</div>'+
     '<ul class="sum">'+pecahBarang(a.barang).map(b => '<li><span>'+esc(b.nama)+'</span><b>'+esc(b.qty)+'</b></li>').join('')+'<li><span><strong>Jumlah dikira</strong></span><b>'+(a.jumlah || 0)+' item</b></li></ul>'+
     '<div class="hint mono-s" style="font-size:14px">ID '+esc(a.id)+'</div><div class="err" id="errSahK"></div></div>'+
-    '<div class="dlg-foot"><div class="right"><button type="button" class="btn" data-close>Kembali</button><button type="button" class="btn sah" id="btnSahK">✓ Sudah diambil</button></div></div>');
+    (a.diubah ? '<div class="hint">'+esc(a.diubah)+'</div>' : '')+
+    '<div class="dlg-foot"><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="btnUbahK">Ubah barang</button><button type="button" class="btn danger" id="btnBatalK">Batal ambilan</button></div>'+
+    '<div class="right"><button type="button" class="btn" data-close>Kembali</button><button type="button" class="btn sah" id="btnSahK">✓ Sudah diambil</button></div></div>');
   $('#btnSahK').onclick = () => aksiStaf('sahkanAmbilan', [a.id], $('#btnSahK'), $('#errSahK'), 'Ambilan '+(a.nama || '')+' disahkan');
+  $('#btnUbahK').onclick = () => bukaUbahAmbilan(a.id, true);
+  $('#btnBatalK').onclick = () => bukaBatalAmbilan(a.id, true);
+}
+/* ---------- UBAH / BATAL AMBILAN (sebelum disahkan) ---------- */
+async function bukaUbahAmbilan(id, dariStaf){
+  const err = $('#errSahK') || $('#errResit');
+  let b;
+  try { b = await api('butiranAmbilan', S.token, id); }
+  catch (e) { if (sesiTamat(e)) { tutupDlg(); return logKeluar(); } if (err) err.textContent = mesejRalat(e); else toast(mesejRalat(e)); return; }
+  const ctx = { pick: Object.assign({}, b.pilih) }, had = b.hadItem;
+  const kira = () => Object.values(kiraanKat(ctx.pick, b.stok)).reduce((x, n) => x + n, 0);
+  const lukis = () => {
+    $('#ubPick').innerHTML = pickerHtml(b.stok, ctx.pick, had);
+    const n = kira(), bk = n ? bakiBoleh(ctx.pick, b.stok, had) : null;
+    $('#ubN').innerHTML = esc(had > 0 ? n + ' / ' + had + ' item' : n + ' item') + (bk && bk.lagi ? ' <span class="ingat-r">· boleh tambah ' + bk.lagi + ' lagi</span>' : bk && bk.percuma.length ? ' <span class="ingat-r">· ada barang percuma</span>' : ''); $('#ubGo').disabled = n === 0;
+  };
+  bukaDlg('<div class="dlg-head"><h2>Ubah ambilan</h2><p>'+esc(b.nama)+(b.matriks ? ' · '+esc(b.matriks) : '')+' · '+esc(masa(b.masa))+'</p></div>'+
+    '<div class="dlg-body flush" id="ubPick"></div><div class="dlg-body" style="padding-top:8px"><div class="hint">Barang asal akan dipulangkan ke stok dan barang baharu ditolak. Had kategori tetap dikenakan.</div><div class="err" id="ubE"></div></div>'+
+    '<div class="dlg-foot"><strong id="ubN"></strong><div class="right"><button type="button" class="btn" data-close>Kembali</button><button class="btn primary" id="ubGo">Simpan perubahan</button></div></div>');
+  lukis();
+  $('#ubPick').addEventListener('click', e => { const x = e.target.closest('[data-step]'); if (!x) return; ubahPick(ctx.pick, b.stok, had, x.dataset.id, Number(x.dataset.step)); lukis(); });
+  $('#ubGo').onclick = async () => {
+    const g = $('#ubGo'); g.disabled = true; g.textContent = 'Menyimpan…'; $('#ubE').textContent = '';
+    try {
+      const r = await api('ubahAmbilan', S.token, id, Object.keys(ctx.pick).map(k => ({ id: k, qty: ctx.pick[k] })), null);
+      S.d = r.data; render();
+      if (dariStaf) { const a = (S.d.urus.ambilan || []).find(x => x.id === id); toast('Ambilan dikemas kini'); if (a) bukaSahkanKiosk(a); else tutupDlg(); }
+      else { tunjukResit(r.resit, false); toast('Ambilan dikemas kini. Tunjukkan resit baharu kepada petugas.'); }
+    } catch (e) {
+      if (sesiTamat(e)) { tutupDlg(); return logKeluar(); }
+      $('#ubE').textContent = mesejRalat(e); g.disabled = false; g.textContent = 'Simpan perubahan';
+    }
+  };
+}
+function bukaBatalAmbilan(id, dariStaf){
+  bukaDlg('<form id="fBt" novalidate><div class="dlg-head"><h2>Batal ambilan?</h2><p>Semua barang dalam ambilan ini akan dipulangkan ke stok.'+(dariStaf ? '' : ' Anda boleh membuat ambilan baharu selepas ini.')+'</p></div><div class="dlg-body">'+
+    '<div class="field"><label for="btS">Sebab (pilihan)</label><input id="btS" maxlength="140" placeholder="'+(dariStaf ? 'Contoh: Pelajar tidak datang ke kiosk' : 'Contoh: Tersalah pilih barang')+'"></div><div class="err" id="btE"></div></div>'+
+    '<div class="dlg-foot"><div class="right"><button type="button" class="btn" data-close>Kembali</button><button class="btn danger" id="btGo" type="submit">Batal ambilan</button></div></div></form>');
+  $('#fBt').addEventListener('submit', ev => { ev.preventDefault(); aksiStaf('batalAmbilan', [id, $('#btS').value.trim()], $('#btGo'), $('#btE'), 'Ambilan dibatalkan. Stok dipulangkan.'); });
 }
 function stafAmbilan(u){
   const f = S.amb;
   const list = u.ambilan.filter(a => (!f.src || (f.src === 'Menunggu' ? a.status === 'Menunggu' : a.sumber === f.src)) && (!f.q || (a.nama+' '+a.matriks+' '+a.email+' '+a.barang+' '+a.id).toLowerCase().indexOf(f.q.toLowerCase()) >= 0));
-  return '<div class="bar"><div class="field" style="flex:1;min-width:200px"><label for="aQ">Cari</label><input id="aQ" type="search" value="'+esc(f.q)+'" placeholder="Nama, no. matriks, e-mel atau ID resit"></div>'+
+  return notifHtml() + '<div class="bar"><div class="field" style="flex:1;min-width:200px"><label for="aQ">Cari</label><input id="aQ" type="search" value="'+esc(f.q)+'" placeholder="Nama, no. matriks, e-mel atau ID resit"></div>'+
     '<div class="chips">'+[['','Semua'],['Menunggu','Belum disahkan ('+(u.menunggu || 0)+')'],['Sistem','Sistem'],['Borang','Google Form']].map(c => '<button class="chip" data-src="'+c[0]+'" aria-pressed="'+(f.src === c[0])+'">'+c[1]+'</button>').join('')+'</div></div>'+
     '<section class="panel"><div class="panel-head"><span>'+list.length+' rekod (300 terkini)</span></div><ul class="list">'+(list.length ? list.map(barisAmbilan).join('') : '<li class="empty">Tiada rekod sepadan.</li>')+'</ul></section>';
 }
@@ -1923,9 +2032,9 @@ function stafPelajar(u){
 function stafLog(u){
   const f = S.log;
   const list = u.log.filter(l => !f.t || l.jenis === f.t);
-  return '<div class="bar"><div class="chips">'+[['','Semua'],['Masuk','Masuk'],['Keluar','Keluar'],['Ambilan','Ambilan'],['Staf','Staf meal'],['Pindah','Kotak → rak'],['Kiraan','Kiraan']].map(c => '<button class="chip" data-lt="'+c[0]+'" aria-pressed="'+(f.t === c[0])+'">'+c[1]+'</button>').join('')+'</div></div>'+
+  return '<div class="bar"><div class="chips">'+[['','Semua'],['Masuk','Masuk'],['Keluar','Keluar'],['Ambilan','Ambilan'],['Staf','Staf meal'],['Pulang','Pulang'],['Pindah','Kotak → rak'],['Kiraan','Kiraan']].map(c => '<button class="chip" data-lt="'+c[0]+'" aria-pressed="'+(f.t === c[0])+'">'+c[1]+'</button>').join('')+'</div></div>'+
     '<section class="panel"><ul class="list">'+(list.length ? list.map(l => {
-      const tanda = l.jenis === 'Masuk' ? '+'+l.qty : l.jenis === 'Kiraan' ? '='+l.selepas : l.jenis === 'Padam' ? '×' : l.jenis === 'Pindah' ? '⇢'+l.qty : '−'+l.qty;
+      const tanda = l.jenis === 'Masuk' ? '+'+l.qty : l.jenis === 'Kiraan' ? '='+l.selepas : l.jenis === 'Padam' ? '×' : l.jenis === 'Pindah' ? '⇢'+l.qty : l.jenis === 'Pulang' ? '+'+l.qty : '−'+l.qty;
       return '<li class="row"><div class="row-main"><div class="row-t">'+esc(l.item)+'</div><div class="row-m"><span>'+esc(l.jenis)+'</span><span>stok '+l.sebelum+' → '+l.selepas+'</span>'+(l.catatan ? '<span>'+esc(l.catatan)+'</span>' : '')+'</div><div class="row-m"><span>'+esc(masa(l.masa))+'</span><span>'+esc(l.oleh)+'</span></div></div><div class="row-side"><span class="lt '+l.jenis.toLowerCase()+'">'+tanda+'</span></div></li>';
     }).join('') : '<li class="empty"><strong>Belum ada aktiviti stok</strong>Setiap stok masuk, keluar, kiraan dan ambilan direkod di sini.</li>')+'</ul></section>';
 }
@@ -1979,16 +2088,123 @@ $('#main').addEventListener('keydown', e => {
   const semua = Array.from(document.querySelectorAll('[data-kp]')); const n = semua[semua.indexOf(e.target) + 1];
   if (n) { n.focus(); n.select(); } else e.target.blur();
 });
-// Di kiosk: senarai ambilan dimuat semula setiap 30 saat supaya ambilan baharu terus kelihatan
-setInterval(() => {
-  if (S.d && S.token && S.mode === 'staf' && S.tab === 'ambilan' && !document.hidden && !dlg.open && !(document.activeElement && document.activeElement.id === 'aQ' && document.activeElement.value)) muat(false);
-}, 30000);
+/* ---------- NOTIFIKASI LANGSUNG (tanpa muat semula) ---------- */
+const LV = { versi:'', kenal:null, saya:null, sibuk:false, akhir:0, audio:null };
+function tajukAsal(){ return ((AWAM && AWAM.tajuk) || 'Food Bank Siswa') + ' · JPP PKK'; }
+function kemasLencana(n){
+  document.title = n ? '(' + n + ') ' + tajukAsal() : tajukAsal();
+  if (S.d && S.d.urus) S.d.urus.menunggu = n;
+  const t = document.querySelector('[data-tab="ambilan"]');
+  if (t) t.innerHTML = 'Ambilan' + (n ? ' <span class="pill st-menunggu" style="padding:1px 7px">' + n + '</span>' : '');
+  const c = document.querySelector('[data-src="Menunggu"]'); if (c) c.textContent = 'Belum disahkan (' + n + ')';
+}
+function bunyi(){
+  try {
+    const A = window.AudioContext || window.webkitAudioContext; if (!A) return;
+    LV.audio = LV.audio || new A();
+    if (LV.audio.state === 'suspended') LV.audio.resume();
+    [[880, 0], [1320, .18]].forEach(([f, t0]) => {
+      const o = LV.audio.createOscillator(), g = LV.audio.createGain(), t = LV.audio.currentTime + t0;
+      o.frequency.value = f; o.type = 'sine'; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+      o.connect(g); g.connect(LV.audio.destination); o.start(t); o.stop(t + 0.18);
+    });
+  } catch (e) {}
+}
+document.addEventListener('pointerdown', () => { try { if (LV.audio && LV.audio.state === 'suspended') LV.audio.resume(); } catch (e) {} }, { passive: true });
+function tunjukLive(tajuk, isi, butang, fn){
+  const b = $('#liveBar');
+  b.innerHTML = '<h4>🔔 ' + esc(tajuk) + '</h4><p>' + isi + '</p><div class="acts"><button type="button" class="btn" data-live="tutup">Tutup</button>' + (butang ? '<button type="button" class="btn primary" data-live="buka">' + esc(butang) + '</button>' : '') + '</div>';
+  b.hidden = false;
+  b.querySelector('[data-live="tutup"]').onclick = () => { b.hidden = true; };
+  const k = b.querySelector('[data-live="buka"]'); if (k) k.onclick = () => { b.hidden = true; fn && fn(); };
+  clearTimeout(tunjukLive.t); tunjukLive.t = setTimeout(() => { b.hidden = true; }, 90000);
+}
+function bukaMenunggu(id){
+  if (!S.d || !S.d.saya.staf) return;
+  S.mode = 'staf'; S.tab = 'ambilan'; S.amb = { q:'', src:'Menunggu' }; render();
+  const a = id && (S.d.urus.ambilan || []).find(x => x.id === id); if (a && a.status === 'Menunggu') bukaSahkanKiosk(a);
+}
+function notifPelayar(tajuk, badan, tag, klik){
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const n = new Notification(tajuk, { body: badan, tag: tag, renotify: true, icon: LOGO && LOGO.length < 200000 ? LOGO : undefined });
+    n.onclick = () => { window.focus(); n.close(); klik && klik(); };
+  } catch (e) { /* sesetengah telefon hanya benarkan notifikasi melalui service worker */ }
+}
+function maklumBaru(baru){
+  const a = baru[0];
+  const isi = '<b>' + esc(a.nama || 'Pelajar') + '</b>' + (a.matriks ? ' · ' + esc(a.matriks) : '') + ' · ' + a.jumlah + ' item<br>' + esc(a.barang) + (baru.length > 1 ? '<br>+' + (baru.length - 1) + ' ambilan lain' : '');
+  tunjukLive(baru.length > 1 ? baru.length + ' ambilan baharu menunggu pengesahan' : 'Ambilan baharu menunggu pengesahan', isi, 'Semak & sahkan', () => bukaMenunggu(a.id));
+  bunyi();
+  try { if (navigator.vibrate) navigator.vibrate([200, 100, 200]); } catch (e) {}
+  notifPelayar('Ambilan baharu · Food Bank Siswa', (a.nama || 'Pelajar') + ' · ' + a.jumlah + ' item: ' + a.barang, 'fbjpp-' + a.id, () => bukaMenunggu(a.id));
+}
+function selamatSegar(){
+  if (dlg.open || $('#dlgIk').open) return false;
+  const el = document.activeElement;
+  if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) && el.id !== 'aQ') return false;
+  if (S.mode === 'pelajar') return true;
+  return ['ringkasan', 'ambilan', 'pelajar', 'log', 'stok', 'batch'].indexOf(S.tab) >= 0;
+}
+async function semakLangsung(){
+  if (!S.token || !S.d || LV.sibuk || !(ADA_GAS || ADA_API)) return;
+  if (LV.tunggak && selamatSegar()) { LV.tunggak = false; muat(false); return; }
+  const staf = !!S.d.saya.staf;
+  if (!staf && !(S.d.sejarah || []).some(a => a.status === 'Menunggu') && !Object.values(LV.saya || {}).some(x => x === 'Menunggu')) return;   // pelajar tanpa ambilan menunggu: tidak perlu semak
+  const jarak = document.hidden ? 60000 : (staf ? 15000 : 20000);
+  if (Date.now() - LV.akhir < jarak) return;
+  LV.sibuk = true; LV.akhir = Date.now();
+  try {
+    const r = await api('semakBaru', S.token, LV.versi);
+    if (!r || r.sama) return;
+    const pertama = !LV.versi; LV.versi = r.versi;
+    if (r.staf) {
+      const baru = LV.kenal ? r.menunggu.filter(x => !LV.kenal.has(x.id)) : [];
+      LV.kenal = new Set(r.menunggu.map(x => x.id));
+      kemasLencana(r.jumlah);
+      if (baru.length) maklumBaru(baru);
+    } else {
+      const kini = {}; (r.ambilan || []).forEach(a => { kini[a.id] = a.status; });
+      if (LV.saya) Object.keys(kini).forEach(id => {
+        if (LV.saya[id] === 'Menunggu' && kini[id] === 'Diambil') {
+          const st = document.querySelector('#dlg .resit-st');
+          if (st) { st.className = 'resit-st st-sah'; st.textContent = '✓ Disahkan oleh petugas'; ['#btnUbahR', '#btnBatalR'].forEach(q => { const x = $(q); if (x) x.remove(); }); }
+          tunjukLive('Ambilan anda telah disahkan', 'Terima kasih. Petugas JPP telah mengesahkan ambilan anda.', '', null);
+          bunyi();
+        }
+      });
+      LV.saya = kini;
+    }
+    if (!pertama) { if (selamatSegar()) muat(false); else LV.tunggak = true; }
+  } catch (e) { /* cuba lagi pada pusingan seterusnya */ }
+  finally { LV.sibuk = false; }
+}
+setInterval(semakLangsung, 5000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { LV.akhir = 0; semakLangsung(); } });
+function notifHtml(){
+  if (!('Notification' in window) || !S.d || !S.d.saya.staf) return '';
+  const p = Notification.permission;
+  if (p === 'granted') return '';
+  if (p === 'denied') return '<div class="banner notif-on"><span>🔕 Notifikasi pelayar disekat untuk laman ini. Benarkan dalam tetapan pelayar (ikon 🔒 di sebelah alamat) untuk menerima amaran ambilan baharu walaupun tab lain sedang dibuka.</span></div>';
+  return '<div class="banner notif-on"><span>🔔 <b>Hidupkan notifikasi</b> supaya peranti ini memberi amaran setiap kali ada ambilan baharu, walaupun anda di tab lain.</span><button class="btn" data-notif="1">Hidupkan</button></div>';
+}
+document.addEventListener('click', async e => {
+  if (!e.target.closest('[data-notif]')) return;
+  try {
+    const p = await Notification.requestPermission();
+    bunyi();
+    if (p === 'granted') { notifPelayar('Notifikasi dihidupkan', 'Anda akan dimaklumkan setiap kali ada ambilan baharu.', 'fbjpp-uji'); toast('Notifikasi dihidupkan'); }
+    else toast('Notifikasi tidak dibenarkan');
+  } catch (x) { toast('Pelayar ini tidak menyokong notifikasi'); }
+  if (S.d) render();
+});
 
 /* ---------- dialogs ---------- */
 const dlg = $('#dlg');
 function bukaDlg(html){ dlg.innerHTML = html; if (!dlg.open) dlg.showModal(); const f = dlg.querySelector('input:not([type=hidden]),select,textarea'); if (f && window.innerWidth > 760) f.focus(); }
 function tutupDlg(){ if (dlg.open) dlg.close(); }
 dlg.addEventListener('click', e => { if (e.target === dlg || e.target.closest('[data-close]')) tutupDlg(); });
+dlg.addEventListener('close', () => { if (typeof LV !== 'undefined' && LV.tunggak) setTimeout(semakLangsung, 300); });
 
 async function aksiStaf(fn, args, btn, errEl, mesej){
   btn.disabled = true; const asal = btn.textContent; btn.textContent = 'Menyimpan…'; errEl.textContent = '';
@@ -2054,12 +2270,14 @@ function bukaItem(i){
   });
 }
 
-function bukaBagiPihak(p){
+function bukaBagiPihakSemula(ctx){ bukaBagiPihak({ email: ctx.email, nama: ctx.nama, matriks: ctx.matriks || '' }, ctx.pick); }
+function bukaBagiPihak(p, pickAsal){
   const stok = S.d.stok.filter(i => i.stok > 0 && hadKat(i.kategori).papar && hadKat(i.kategori).had !== 0), had = S.d.tetapan.hadItem;
-  const ctx = { email: p.email, nama: p.nama, pick: {} };
+  const ctx = { email: p.email, nama: p.nama, matriks: p.matriks, pick: Object.assign({}, pickAsal || {}) };
   const lukis = () => {
     $('#bpPick').innerHTML = stok.length ? pickerHtml(stok, ctx.pick, had) : '<div class="empty">Tiada stok tersedia.</div>';
-    const n = jumlahPick(ctx.pick); $('#bpN').textContent = had > 0 ? n+' / '+had+' item' : n+' item'; $('#bpGo').disabled = n === 0;
+    const n = jumlahPick(ctx.pick), bk = n ? bakiBoleh(ctx.pick, stok, had) : null;
+    $('#bpN').innerHTML = esc(had > 0 ? n+' / '+had+' item' : n+' item') + (bk && bk.lagi ? ' <span class="ingat-r">· boleh tambah '+bk.lagi+' lagi</span>' : ''); $('#bpGo').disabled = n === 0;
   };
   bukaDlg('<div class="dlg-head"><h2>Rekod ambilan</h2><p>'+esc(p.nama)+' · '+esc(p.matriks)+'</p></div><div class="dlg-body flush" id="bpPick"></div>'+
     '<div class="dlg-foot"><strong id="bpN"></strong><div class="right"><button type="button" class="btn" data-close>Batal</button><button class="btn primary" id="bpGo">Teruskan</button></div></div>');
