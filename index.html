@@ -1385,7 +1385,7 @@ function stafStok(){
       return '<li class="item"><div class="row-main"><div class="row-t">'+esc(i.nama)+'</div><div class="row-m">'+meta+'</div></div>'+
         '<div class="qty qty-rak" style="text-align:right">'+(i.stok == null ? '–' : rakItem(i))+(i.hadRak ? '<small style="display:inline"> / '+i.hadRak+'</small>' : '')+'<small class="jum">'+esc(i.unit)+' di rak</small><small class="jum">jumlah '+(i.stok == null ? '–' : i.stok)+(i.kotak ? ' · kotak '+i.kotak : '')+' · min '+i.min+'</small></div>'+
         '<span class="pill st-'+st+'">'+ST_LABEL[st]+'</span>'+
-        '<div class="acts"><button class="btn in" data-act="Masuk" data-id="'+esc(i.id)+'">+ Masuk</button><button class="btn out" data-act="Keluar" data-id="'+esc(i.id)+'" '+(i.stok > 0 ? '' : 'disabled')+'>− Keluar</button>'+(i.kotak ? '<button class="btn" data-act="Pindah" data-id="'+esc(i.id)+'">Ke rak</button>' : '')+'<button class="btn" data-act="Kiraan" data-id="'+esc(i.id)+'">Kira</button><button class="btn" data-act="edit" data-id="'+esc(i.id)+'">Edit</button></div></li>';
+        '<div class="acts"><button class="btn in" data-act="Masuk" data-id="'+esc(i.id)+'">+ Masuk</button><button class="btn out" data-act="Keluar" data-id="'+esc(i.id)+'" '+(i.stok > 0 ? '' : 'disabled')+'>− Keluar</button>'+((i.stok || 0) > 0 ? '<button class="btn" data-act="'+(i.kotak ? 'Pindah' : 'KeKotak')+'" data-id="'+esc(i.id)+'" title="Pindah antara rak dan kotak">Rak ⇄ kotak</button>' : '')+'<button class="btn" data-act="Kiraan" data-id="'+esc(i.id)+'">Kira</button><button class="btn" data-act="edit" data-id="'+esc(i.id)+'">Edit</button></div></li>';
     }).join('') : '<li class="empty"><strong>Tiada item sepadan</strong>Ubah carian atau penapis.</li>')+'</ul></section>';
 }
 
@@ -2357,7 +2357,7 @@ async function aksiStaf(fn, args, btn, errEl, mesej){
 function bukaTransaksi(i, mod){
   const u = i.unit || 'unit', kini = i.stok || 0, kotak = i.kotak || 0;
   bukaDlg('<form id="fTx" novalidate><div class="dlg-head"><h2>'+esc(i.nama)+'</h2><p>'+esc(i.kategori)+(i.lokasi ? ' · '+esc(i.lokasi) : '')+' · rak '+Math.max(0, kini - kotak)+' · kotak '+kotak+'</p></div><div class="dlg-body">'+
-    '<div class="seg" role="group" aria-label="Jenis"><button type="button" data-m="Masuk">Stok masuk</button><button type="button" data-m="Keluar">Stok keluar</button><button type="button" data-m="Pindah"'+(kotak > 0 ? '' : ' hidden')+'>Kotak → rak</button><button type="button" data-m="Kiraan">Kiraan semula</button></div>'+
+    '<div class="seg" role="group" aria-label="Jenis"><button type="button" data-m="Masuk">Stok masuk</button><button type="button" data-m="Keluar">Stok keluar</button><button type="button" data-m="Pindah"'+(kotak > 0 ? '' : ' hidden')+'>Kotak → rak</button><button type="button" data-m="KeKotak"'+(kini - kotak > 0 ? '' : ' hidden')+'>Rak → kotak</button><button type="button" data-m="Kiraan">Kiraan semula</button></div>'+
     '<div class="field"><label for="txQ" id="txL">Kuantiti</label><input id="txQ" type="number" inputmode="numeric" min="0" step="1"></div>'+
     '<div class="field" id="txTW"><span class="lbl-s">Simpan di</span><div class="chips"><label class="mini"><input type="radio" name="txT" value="rak" checked> Rak / chiller (dipamerkan)</label><label class="mini"><input type="radio" name="txT" value="kotak"> Dalam kotak / stor</label></div></div>'+
     '<div class="grid2" id="txLW"><div class="field"><label for="txLuput">Tarikh luput batch ini</label><input id="txLuput" type="date"><span class="hint">Setiap stok masuk direkod sebagai satu batch (FEFO).</span></div>'+
@@ -2368,14 +2368,16 @@ function bukaTransaksi(i, mod){
     '<div class="dlg-foot"><div class="right"><button type="button" class="btn" data-close>Batal</button><button class="btn primary" id="txGo" type="submit">Simpan</button></div></div></form>');
   let m = mod;
   const upd = () => { const q = parseInt($('#txQ').value, 10);
+    if (m === 'KeKotak') { const k = isNaN(q) ? null : kotak + q;
+      $('#txP').innerHTML = '<span>Di rak <b>'+(kini - kotak)+'</b></span><span>Selepas kembalikan: rak <b style="color:'+(k != null && kini - k < 0 ? 'var(--crit)' : 'inherit')+'">'+(k == null ? '–' : kini - k)+'</b> · kotak <b>'+(k == null ? '–' : k)+'</b></span>'; return; }
     if (m === 'Pindah') { const k = isNaN(q) ? null : kotak - q;
       $('#txP').innerHTML = '<span>Dalam kotak <b>'+kotak+'</b></span><span>Selepas pindah: rak <b>'+(k == null ? '–' : kini - k)+'</b> · kotak <b style="color:'+(k < 0 ? 'var(--crit)' : 'inherit')+'">'+(k == null ? '–' : k)+'</b></span>'; return; }
     const s = isNaN(q) ? null : m === 'Masuk' ? kini + q : m === 'Keluar' ? kini - q : q;
     $('#txP').innerHTML = '<span>Stok sekarang <b>'+(i.stok == null ? '–' : kini)+'</b></span><span>Selepas simpan <b style="color:'+(s < 0 ? 'var(--crit)' : 'inherit')+'">'+(s == null ? '–' : s)+'</b> '+esc(u)+'</span>'; };
   const setM = x => { m = x; dlg.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.m === m)));
-    $('#txL').textContent = m === 'Kiraan' ? 'Jumlah sebenar, rak + kotak ('+u+')' : m === 'Pindah' ? 'Kuantiti dikeluarkan dari kotak ke rak ('+u+')' : 'Kuantiti ('+u+')';
+    $('#txL').textContent = m === 'Kiraan' ? 'Jumlah sebenar, rak + kotak ('+u+')' : m === 'Pindah' ? 'Kuantiti dikeluarkan dari kotak ke rak ('+u+')' : m === 'KeKotak' ? 'Kuantiti dikembalikan dari rak ke kotak ('+u+')' : 'Kuantiti ('+u+')';
     $('#txLW').hidden = m !== 'Masuk'; $('#txTW').hidden = m !== 'Masuk'; $('#txBW').hidden = m !== 'Keluar' || !(i.batch || []).length;
-    $('#txC').placeholder = m === 'Masuk' ? 'Contoh: Sumbangan alumni / belian koperasi' : m === 'Keluar' ? 'Contoh: Rosak / diagihkan ke program' : m === 'Pindah' ? 'Contoh: Restock rak petang' : 'Contoh: Kiraan mingguan';
+    $('#txC').placeholder = m === 'Masuk' ? 'Contoh: Sumbangan alumni / belian koperasi' : m === 'Keluar' ? 'Contoh: Rosak / diagihkan ke program' : m === 'Pindah' ? 'Contoh: Restock rak petang' : m === 'KeKotak' ? 'Contoh: Rak terlalu penuh / simpan semula' : 'Contoh: Kiraan mingguan';
     if (m === 'Kiraan' && !$('#txQ').value && i.stok != null) $('#txQ').value = kini; upd(); };
   dlg.querySelectorAll('.seg button').forEach(b => b.onclick = () => setM(b.dataset.m));
   $('#txQ').addEventListener('input', upd); setM(m);
@@ -2383,9 +2385,10 @@ function bukaTransaksi(i, mod){
     const q = parseInt($('#txQ').value, 10);
     if (isNaN(q) || q < 0 || (m !== 'Kiraan' && q === 0)) { $('#txE').textContent = m === 'Kiraan' ? 'Masukkan jumlah sebenar (0 atau lebih).' : 'Masukkan kuantiti sekurang-kurangnya 1.'; return; }
     if (m === 'Pindah' && q > kotak) { $('#txE').textContent = 'Dalam kotak hanya ada '+kotak+' '+u+'.'; return; }
+    if (m === 'KeKotak' && q > kini - kotak) { $('#txE').textContent = 'Di rak hanya ada '+(kini - kotak)+' '+u+'.'; return; }
     const tempat = (dlg.querySelector('input[name="txT"]:checked') || {}).value || 'rak';
     aksiStaf('transaksiStok', [i.id, m, q, $('#txC').value.trim(), m === 'Masuk' ? $('#txLuput').value : null, m === 'Masuk' ? tempat : null, m === 'Masuk' ? $('#txS').value.trim() : null, m === 'Keluar' ? $('#txB').value : null], $('#txGo'), $('#txE'),
-      m === 'Masuk' ? '+'+q+' '+u+' '+i.nama+(tempat === 'kotak' ? ' disimpan dalam kotak' : ' direkod') : m === 'Keluar' ? '−'+q+' '+u+' '+i.nama+' direkod' : m === 'Pindah' ? q+' '+u+' '+i.nama+' dipindah ke rak' : 'Kiraan '+i.nama+' dikemas kini');
+      m === 'Masuk' ? '+'+q+' '+u+' '+i.nama+(tempat === 'kotak' ? ' disimpan dalam kotak' : ' direkod') : m === 'Keluar' ? '−'+q+' '+u+' '+i.nama+' direkod' : m === 'Pindah' ? q+' '+u+' '+i.nama+' dipindah ke rak' : m === 'KeKotak' ? q+' '+u+' '+i.nama+' dikembalikan ke kotak' : 'Kiraan '+i.nama+' dikemas kini');
   });
 }
 
