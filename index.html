@@ -1101,7 +1101,7 @@ function renderPelajar(){
   } else {
     status = '<section class="status wait"><div class="big">'+k.lagiHari+'<small>HARI</small></div><h2>Ambilan seterusnya: '+esc(tarikhPenuh(k.seterusnya))+'</h2><p>Ambilan terakhir: '+tarikhPendek(k.terakhir)+(k.mingguIni >= k.hadSeminggu ? ' · Had mingguan sudah dicapai' : '')+'</p>'+rules+'</section>';
   }
-  const stok = d.stok;
+  const stok = stokPelajar();
   let barang;
   if (!stok.length) {
     barang = '<section class="panel"><div class="empty"><strong>Tiada barang tersedia sekarang</strong>Stok sedang diisi semula oleh JPP. Sila semak semula kemudian.</div></section>';
@@ -1182,12 +1182,21 @@ $('#main').addEventListener('click', e => {
   }
   const b = e.target.closest('[data-step]');
   if (b && S.mode === 'pelajar') {
-    ubahPick(S.pick, S.d.stok, S.d.kelayakan.hadItem, b.dataset.id, Number(b.dataset.step));
-    $('#picker').innerHTML = pickerHtml(S.d.stok, S.pick, S.d.kelayakan.hadItem);
+    ubahPick(S.pick, stokPelajar(), S.d.kelayakan.hadItem, b.dataset.id, Number(b.dataset.step));
+    $('#picker').innerHTML = pickerHtml(stokPelajar(), S.pick, S.d.kelayakan.hadItem);
     kemasCart();
   }
 });
 // Berapa item lagi yang masih boleh dipilih (ikut had keseluruhan, had kategori dan stok)
+// Stok seperti yang dilihat pelajar: hanya unit di rak, kategori yang dibenarkan dan stok > 0.
+// Akaun pelajar sudah menerima senarai ini dari pelayan; akaun staf (Paparan pelajar) ditapis di sini.
+function stokPelajar(){
+  if (!S.d.saya.staf) return S.d.stok;
+  if (S._sp && S._sp.d === S.d) return S._sp.l;
+  const l = S.d.stok.filter(i => rakItem(i) > 0 && hadKat(i.kategori).papar !== false && hadKat(i.kategori).had !== 0).map(i => Object.assign({}, i, { stok: rakItem(i) }));
+  S._sp = { d: S.d, l };
+  return l;
+}
 function jumlahKira(p, stok){ return Object.values(kiraanKat(p, stok)).reduce((x, n) => x + n, 0); }
 function stokBolehPilih(stok){ return (stok || S.d.stok).filter(i => (i.stok || 0) > 0 && hadKat(i.kategori).papar !== false && hadKat(i.kategori).had !== 0); }
 function bakiBoleh(pick, stok, had){
@@ -1223,10 +1232,10 @@ function ingatHtml(b, had){
 }
 function kemasCart(){
   const bar = $('#cartbar');
-  if (S.mode !== 'pelajar' || !S.d.saya.profil || !S.d.kelayakan.boleh || !S.d.stok.length || (S.d.awam && S.d.awam.terima === false)) { bar.hidden = true; return; }
+  if (S.mode !== 'pelajar' || !S.d.saya.profil || !S.d.kelayakan.boleh || !stokPelajar().length || (S.d.awam && S.d.awam.terima === false)) { bar.hidden = true; return; }
   const n = jumlahPick(S.pick), had = S.d.kelayakan.hadItem, buka = S.d.kiosk.buka;
   bar.hidden = false;
-  const bk = n > 0 ? bakiBoleh(S.pick, S.d.stok, had) : null;
+  const bk = n > 0 ? bakiBoleh(S.pick, stokPelajar(), had) : null;
   const nota = bk && bk.lagi ? '<small class="lagi">Boleh tambah '+bk.lagi+' item lagi</small>' : bk && bk.percuma.length ? '<small class="lagi">+ '+bk.percuma.map(p => p.unit+' '+p.nama+' '+p.kategori).join(', ')+' percuma</small>' : '';
   $('#cartCount').innerHTML = had > 0
     ? '<span class="'+(n >= had ? 'full' : '')+'">'+n+' / '+had+'</span>'+(nota || '<small>'+(n >= had ? 'Had item dicapai' : 'item dipilih')+'</small>')
@@ -1244,7 +1253,7 @@ function bukaSahkan(pelajar){
   const pick = pelajar ? pelajar.pick : S.pick;
   const n = jumlahPick(pick);
   const had = pelajar ? S.d.tetapan.hadItem : S.d.kelayakan.hadItem;
-  const bk = bakiBoleh(pick, S.d.stok, had), ingat = ingatHtml(bk, had);
+  const bk = bakiBoleh(pick, pelajar ? S.d.stok.filter(i => i.stok > 0 && hadKat(i.kategori).papar && hadKat(i.kategori).had !== 0) : stokPelajar(), had), ingat = ingatHtml(bk, had);
   bukaDlg('<form id="fSah" novalidate><div class="dlg-head"><h2>Sahkan ambilan</h2><p>'+(pelajar ? 'Bagi pihak '+esc(pelajar.nama || pelajar.email) : esc(S.d.saya.profil.nama)+' · '+esc(S.d.saya.profil.matriks))+'</p></div>'+
     '<div class="dlg-body">'+ingat+'<ul class="sum">'+ringkasPilihan(S.d.stok, pick)+'<li><span><strong>Jumlah</strong></span><b>'+n+(had > 0 ? ' / '+had : '')+' item</b></li></ul>'+
     '<div class="field"><label for="inUlasan">Ulasan dan cadangan (pilihan)</label><textarea id="inUlasan" maxlength="500" placeholder="Contoh: Terima kasih JPP! Harap ada roti juga."></textarea></div>'+
