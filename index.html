@@ -280,6 +280,11 @@ button.tile:hover{border-color:var(--muted)}
 .scan-msg{border-radius:8px;padding:10px 12px;font-weight:700;font-size:15px;background:var(--sunk);text-align:center}
 .scan-msg.ok{background:var(--ok-bg);color:var(--ok)} .scan-msg.ralat{background:var(--crit-bg);color:var(--crit)}
 .scan-m{display:flex;gap:8px} .scan-m input{flex:1}
+.scan-kawal{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.scan-kawal .btn{padding:7px 12px;font-size:14px}
+.scan-kawal .btn[aria-pressed="true"]{background:var(--yellow);color:var(--on-yellow)}
+.scan-zum{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;flex:1 1 200px}
+.scan-zum input{flex:1;padding:0}
 .banding{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:8px}
 .banding li{display:grid;grid-template-columns:minmax(0,1fr) 54px 54px 30px;gap:8px;padding:8px 12px;border-top:1px solid var(--line);font-size:14px;align-items:center}
 .banding li:first-child{border-top:0;font-size:12px;color:var(--muted);font-weight:700}
@@ -1735,11 +1740,93 @@ function terimaKod(kodMentah, manual){
   segarPanelImbas();
   if (r.tutup) setTimeout(tutupImbas, 350);
 }
+const FORMAT_IMBAS = () => { const F = window.Html5QrcodeSupportedFormats; return [F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.CODE_128, F.CODE_39, F.ITF, F.QR_CODE]; };
+function bacaPilihanKamera(){ try { return localStorage.getItem('fbjpp_kamera') || ''; } catch (e) { return ''; } }
+function simpanPilihanKamera(id){ try { localStorage.setItem('fbjpp_kamera', id); } catch (e) {} }
+/** Kamera belakang utama: elak kanta ultra-lebar / makro / depth yang selalunya tidak boleh fokus dekat */
+function pilihKamera(cams){
+  if (!cams.length) return null;
+  const simpan = bacaPilihanKamera(); const s = cams.find(c => c.id === simpan); if (s) return s;
+  const belakang = cams.filter(c => /back|rear|environment|belakang/i.test(c.label));
+  const elok = belakang.filter(c => !/ultra|wide|macro|depth|tele|0\.5|uw/i.test(c.label));
+  return elok[0] || belakang[0] || cams[cams.length - 1];
+}
+async function mulaKamera(op){
+  const d = $('#dlgScan');
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { mesejImbas('Kamera tidak disokong di pelayar ini. Guna 📸 Ambil gambar, taip kod atau pengimbas USB.', 'ralat'); $('#scanView').hidden = true; return; }
+  mesejImbas('Membuka kamera…', '');
+  try {
+    await muatPustakaImbas();
+    if (!d.open || IMBAS.op !== op) return;
+    if (!IMBAS.kamera) { try { IMBAS.kamera = await Html5Qrcode.getCameras(); } catch (e) { IMBAS.kamera = []; } }
+    const cams = IMBAS.kamera || [], cam = IMBAS.camPilih || pilihKamera(cams);
+    IMBAS.camPilih = cam;
+    const sc = new Html5Qrcode('scanView', { formatsToSupport: FORMAT_IMBAS(), experimentalFeatures: { useBarCodeDetectorIfSupported: true }, verbose: false });
+    IMBAS.aktif = sc;
+    const kotak = (w, h) => ({ width: Math.floor(Math.min(w * 0.92, 420)), height: Math.floor(Math.min(h * 0.45, 180)) });
+    // Resolusi tinggi + autofokus berterusan supaya barcode kecil tidak kabur
+    const asas = cam ? { deviceId: { exact: cam.id } } : { facingMode: 'environment' };
+    const tinggi = Object.assign({ width: { ideal: 1920 }, height: { ideal: 1080 }, focusMode: 'continuous', advanced: [{ focusMode: 'continuous' }] }, asas);
+    try { await sc.start(asas, { fps: 15, qrbox: kotak, videoConstraints: tinggi }, kod => terimaKod(kod, false), () => {}); }
+    catch (e1) { await sc.start(asas, { fps: 12, qrbox: kotak }, kod => terimaKod(kod, false), () => {}); }   // telefon lama: tetapan asas
+    if (IMBAS.aktif !== sc) return;
+    kawalanKamera(sc, cams);
+    mesejImbas('Sedia. Halakan kamera ke barcode (kira-kira 15–25 cm). Jika kabur, guna zum atau 📸 Ambil gambar.', '');
+  } catch (e) {
+    const t = String(e && (e.name || '') + ' ' + (e.message || e) || e);
+    mesejImbas(/NotAllowed|Permission/i.test(t) ? 'Kebenaran kamera ditolak. Benarkan kamera untuk laman ini (ikon 🔒 di sebelah alamat), atau guna 📸 Ambil gambar.' : 'Kamera tidak dapat dibuka. Guna 📸 Ambil gambar, taip kod atau pengimbas USB.', 'ralat');
+    const v = $('#scanView'); if (v) v.hidden = true;
+    IMBAS.aktif = null;
+  }
+}
+/** Zum, lampu suluh, fokus semula dan tukar kamera — ikut keupayaan kamera telefon */
+function kawalanKamera(sc, cams){
+  const k = $('#scanDinamik'); if (!k) return;
+  let cap = {}; try { cap = sc.getRunningTrackCapabilities() || {}; } catch (e) {}
+  let html = '';
+  if (cap.zoom && cap.zoom.max > (cap.zoom.min || 1)) {
+    const z0 = Math.min(cap.zoom.max, Math.max(cap.zoom.min || 1, 1.5));
+    html += '<label class="scan-zum">Zum <input type="range" id="scanZum" min="' + (cap.zoom.min || 1) + '" max="' + Math.min(cap.zoom.max, 6) + '" step="' + (cap.zoom.step || 0.1) + '" value="' + z0 + '"><span id="scanZumN">' + z0.toFixed(1) + '×</span></label>';
+    sc.applyVideoConstraints({ advanced: [{ zoom: z0 }] }).catch(() => {});
+  }
+  if (cap.torch) html += '<button type="button" class="btn" id="scanLampu" aria-pressed="false">🔦 Lampu</button>';
+  if (cap.focusMode && cap.focusMode.length) html += '<button type="button" class="btn" id="scanFokus">🎯 Fokus semula</button>';
+  const belakang = cams.filter(c => /back|rear|environment|belakang/i.test(c.label));
+  if ((belakang.length || cams.length) > 1) html += '<button type="button" class="btn" id="scanTukar">🔄 Tukar kamera</button>';
+  k.innerHTML = html;
+  const zum = $('#scanZum'); if (zum) zum.oninput = () => { $('#scanZumN').textContent = Number(zum.value).toFixed(1) + '×'; sc.applyVideoConstraints({ advanced: [{ zoom: Number(zum.value) }] }).catch(() => {}); };
+  const lampu = $('#scanLampu'); if (lampu) lampu.onclick = () => { const on = lampu.getAttribute('aria-pressed') !== 'true'; sc.applyVideoConstraints({ advanced: [{ torch: on }] }).then(() => lampu.setAttribute('aria-pressed', String(on))).catch(() => {}); };
+  const fokus = $('#scanFokus'); if (fokus) fokus.onclick = () => { const m = cap.focusMode.indexOf('single-shot') >= 0 ? 'single-shot' : cap.focusMode[0]; sc.applyVideoConstraints({ advanced: [{ focusMode: m }] }).then(() => setTimeout(() => sc.applyVideoConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {}), 1200)).catch(() => {}); };
+  const tukar = $('#scanTukar'); if (tukar) tukar.onclick = async () => {
+    const senarai = belakang.length > 1 ? belakang : cams, i = senarai.findIndex(c => IMBAS.camPilih && c.id === IMBAS.camPilih.id);
+    IMBAS.camPilih = senarai[(i + 1) % senarai.length]; simpanPilihanKamera(IMBAS.camPilih.id);
+    const sc0 = IMBAS.aktif; IMBAS.aktif = null; try { await sc0.stop(); sc0.clear(); } catch (e) {}
+    mulaKamera(IMBAS.op);
+  };
+}
+/** Ambil gambar dengan aplikasi kamera telefon (autofokus penuh) dan baca barcode daripada gambar */
+async function imbasGambar(file){
+  if (!file) return;
+  mesejImbas('Membaca barcode daripada gambar…', '');
+  try {
+    await muatPustakaImbas();
+    let el = document.getElementById('scanFail'); if (!el) { el = document.createElement('div'); el.id = 'scanFail'; el.hidden = true; document.body.appendChild(el); }
+    const sf = new Html5Qrcode('scanFail', { formatsToSupport: FORMAT_IMBAS(), experimentalFeatures: { useBarCodeDetectorIfSupported: true }, verbose: false });
+    const kod = await sf.scanFile(file, false);
+    try { sf.clear(); } catch (e) {}
+    terimaKod(kod, true);
+  } catch (e) {
+    mesejImbas('Barcode tidak dapat dibaca daripada gambar. Ambil semula lebih dekat dan terang, atau taip kod.', 'ralat');
+    nada([[220, 0, 0.18]]);
+  }
+}
 async function bukaImbas(op){
   IMBAS.op = op; IMBAS.akhir = { kod: '', t: 0 };
   const d = $('#dlgScan');
   d.innerHTML = '<div class="dlg-head"><h2>' + esc(op.tajuk) + '</h2><p>' + esc(op.sub || 'Halakan kamera belakang ke barcode pada bungkusan') + '</p></div><div class="dlg-body">' +
-    '<div id="scanView" class="scan-view"></div><div id="scanMsg" class="scan-msg" role="status">Membuka kamera…</div>' +
+    '<div id="scanView" class="scan-view"></div>' +
+    '<div class="scan-kawal" id="scanKawal"><span id="scanDinamik" class="scan-kawal"></span><button type="button" class="btn" id="scanGambar">📸 Ambil gambar</button><input type="file" id="scanFailIn" accept="image/*" capture="environment" hidden></div>' +
+    '<div id="scanMsg" class="scan-msg" role="status">Membuka kamera…</div>' +
     '<form id="fScanM" class="scan-m" novalidate><input id="scanM" autocomplete="off" inputmode="numeric" placeholder="Atau taip kod / guna pengimbas USB, tekan Enter" aria-label="Kod barcode"><button class="btn" type="submit">OK</button></form>' +
     '<div id="scanPanel"></div></div><div class="dlg-foot"><div class="right"><button type="button" class="btn primary" id="scanTutup">' + esc(op.butang || 'Selesai') + '</button></div></div>';
   if (!d.open) d.showModal();
@@ -1747,21 +1834,12 @@ async function bukaImbas(op){
   $('#scanTutup').onclick = tutupImbas;
   d.oncancel = ev => { ev.preventDefault(); tutupImbas(); };
   $('#fScanM').addEventListener('submit', e => { e.preventDefault(); const v = $('#scanM').value.trim(); if (v) { terimaKod(v, true); $('#scanM').value = ''; } });
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { mesejImbas('Kamera tidak disokong di pelayar ini. Taip kod atau guna pengimbas USB.', 'ralat'); $('#scanView').hidden = true; return; }
-  try {
-    await muatPustakaImbas();
-    if (!d.open || IMBAS.op !== op) return;
-    const F = window.Html5QrcodeSupportedFormats;
-    const sc = new Html5Qrcode('scanView', { formatsToSupport: [F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.CODE_128, F.CODE_39, F.ITF, F.QR_CODE], experimentalFeatures: { useBarCodeDetectorIfSupported: true }, verbose: false });
-    IMBAS.aktif = sc;
-    await sc.start({ facingMode: 'environment' }, { fps: 12, qrbox: (w, h) => ({ width: Math.floor(Math.min(w * 0.9, 340)), height: Math.floor(Math.min(h * 0.55, 170)) }) }, kod => terimaKod(kod, false), () => {});
-    if (IMBAS.aktif === sc) mesejImbas('Sedia. Halakan kamera ke barcode.', '');
-  } catch (e) {
-    const t = String(e && (e.name || '') + ' ' + (e.message || e) || e);
-    mesejImbas(/NotAllowed|Permission/i.test(t) ? 'Kebenaran kamera ditolak. Benarkan kamera untuk laman ini (ikon 🔒 di sebelah alamat), atau taip kod di bawah.' : 'Kamera tidak dapat dibuka. Anda masih boleh taip kod atau guna pengimbas USB.', 'ralat');
-    const v = $('#scanView'); if (v) v.hidden = true;
-    IMBAS.aktif = null;
-  }
+  // Ambil gambar: hentikan kamera langsung dahulu supaya aplikasi kamera telefon boleh dibuka, kemudian sambung semula
+  const semula = () => { if (IMBAS.op === op && !IMBAS.aktif && d.open) mulaKamera(op); };
+  d.addEventListener('click', e => { if (e.target.closest('#scanGambar')) { hentiKamera(); $('#scanFailIn').click(); } });
+  $('#scanFailIn').addEventListener('change', async e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; await imbasGambar(f); setTimeout(semula, 600); });
+  $('#scanFailIn').addEventListener('cancel', () => setTimeout(semula, 300));
+  mulaKamera(op);
 }
 // Daftar barcode yang belum dikenali (staf, dari tetingkap imbasan)
 document.addEventListener('click', async e => {
