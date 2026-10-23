@@ -1105,7 +1105,7 @@ function renderPelajar(){
   const k = d.kelayakan;
   const w = d.kiosk;
   const rules = '<div class="rules">'+(k.hadItem > 0 ? '<span class="rule">Maksimum <b>'+k.hadItem+' item</b> sekali ambil</span>' : '')+'<span class="rule">Selang <b>'+k.selang+' hari</b></span><span class="rule">Minggu ini <b>'+k.mingguIni+' / '+k.hadSeminggu+'</b> kali</span>'+
-    (w.sesi.length ? '<span class="rule">Kiosk dibuka <b>'+esc(w.sesi.join(', '))+'</b></span>' : '')+'</div>';
+    (w.sesi.length || (w.hari && w.hari !== 'Setiap hari') ? '<span class="rule">Kiosk dibuka <b>'+esc([w.hari && w.hari !== 'Setiap hari' ? w.hari : '', w.sesi.join(', ')].filter(Boolean).join(' · '))+'</b></span>' : '')+'</div>';
   const tutup = k.boleh && !w.buka ? '<div class="closed">Kiosk tutup sekarang. Dibuka semula '+esc(w.seterusnya)+'.</div>' : '';
   const aw = d.awam || {};
   const atas = '<div class="hero-slot"' + (BANNER ? '' : ' hidden') + '>' + (BANNER ? '<img alt="" src="' + BANNER + '">' : '') + '</div>' +
@@ -1440,7 +1440,24 @@ function bukaSahkanKiosk(a){
     (a.diubah ? '<div class="hint">'+esc(a.diubah)+'</div>' : '')+
     '<div class="dlg-foot"><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" id="btnUbahK">Ubah barang</button><button type="button" class="btn danger" id="btnBatalK">Batal ambilan</button></div>'+
     '<div class="right"><button type="button" class="btn" data-close>Kembali</button><button type="button" class="btn sah" id="btnSahK">✓ Sudah diambil</button></div></div>');
-  $('#btnSahK').onclick = () => aksiStaf('sahkanAmbilan', [a.id], $('#btnSahK'), $('#errSahK'), 'Ambilan '+(a.nama || '')+' disahkan');
+  $('#btnSahK').onclick = async () => {
+    const b = $('#btnSahK'); b.disabled = true; b.textContent = 'Mengesahkan…'; $('#errSahK').textContent = '';
+    try {
+      const r = await api('sahkanAmbilan', S.token, a.id, true);
+      const u = S.d.urus, x = (u.ambilan || []).find(y => y.id === a.id);
+      if (x) Object.assign(x, { status: 'Diambil', sahOleh: r.sahOleh, sahMasa: r.sahMasa });
+      u.menunggu = Math.max(0, (u.menunggu || 1) - 1);
+      if (kunciDari(new Date(a.masa)) === kunciDari(new Date())) u.menungguHariIni = Math.max(0, (u.menungguHariIni || 1) - 1);
+      if (LV.kenal) LV.kenal.delete(a.id);
+      if (r.versi) LV.versi = r.versi;
+      if (S.semak) delete S.semak[a.id];
+      kemasLencana(u.menunggu); tutupDlg(); render(); toast('✓ Ambilan ' + (a.nama || '') + ' disahkan');
+      LV.penuhPada = Date.now() + 45000;
+    } catch (e) {
+      if (sesiTamat(e)) { tutupDlg(); return logKeluar(); }
+      $('#errSahK').textContent = mesejRalat(e); b.disabled = false; b.textContent = '✓ Sudah diambil';
+    }
+  };
   $('#btnUbahK').onclick = () => bukaUbahAmbilan(a.id, true);
   $('#btnBatalK').onclick = () => bukaBatalAmbilan(a.id, true);
   $('#btnImbasK').onclick = () => bukaImbasSemak(a);
@@ -2506,8 +2523,20 @@ function selamatSegar(){
   if (S.mode === 'pelajar') return true;
   return ['ringkasan', 'ambilan', 'pelajar', 'log', 'stok', 'batch'].indexOf(S.tab) >= 0;
 }
+function gabungMenunggu(r){
+  const u = S.d && S.d.urus; if (!u) return;
+  const ada = new Map((u.ambilan || []).map(a => [a.id, a])), kini = new Set(r.menunggu.map(x => x.id));
+  r.menunggu.slice().reverse().forEach(x => {
+    const a = ada.get(x.id);
+    if (a) Object.assign(a, x); else u.ambilan.unshift(Object.assign({ telefon: '', sahOleh: '', sahMasa: '', diubah: '' }, x));
+  });
+  // Ambilan yang tidak lagi menunggu (disahkan / dibatalkan di peranti lain)
+  (u.ambilan || []).forEach(a => { if (a.status === 'Menunggu' && !kini.has(a.id)) a.status = 'Diambil'; });
+  u.menunggu = r.jumlah; u.menungguHariIni = r.hariIni;
+}
 async function semakLangsung(){
   if (!S.token || !S.d || LV.sibuk || !(ADA_GAS || ADA_API)) return;
+  if (LV.penuhPada && Date.now() > LV.penuhPada && selamatSegar()) { LV.penuhPada = 0; muat(false); return; }
   if (LV.tunggak && selamatSegar()) { LV.tunggak = false; muat(false); return; }
   const staf = !!S.d.saya.staf;
   if (!staf && !(S.d.sejarah || []).some(a => a.status === 'Menunggu') && !Object.values(LV.saya || {}).some(x => x === 'Menunggu')) return;   // pelajar tanpa ambilan menunggu: tidak perlu semak
@@ -2521,8 +2550,12 @@ async function semakLangsung(){
     if (r.staf) {
       const baru = LV.kenal ? r.menunggu.filter(x => !LV.kenal.has(x.id)) : [];
       LV.kenal = new Set(r.menunggu.map(x => x.id));
+      gabungMenunggu(r);
       kemasLencana(r.jumlah);
       if (baru.length) maklumBaru(baru);
+      // Kemas kini senarai serta-merta tanpa memuat semula semua data; data penuh dimuat kemudian di latar belakang
+      if (!pertama) { if (selamatSegar()) render(); LV.penuhPada = Date.now() + 45000; }
+      return;
     } else {
       const kini = {}; (r.ambilan || []).forEach(a => { kini[a.id] = a.status; });
       if (LV.saya) Object.keys(kini).forEach(id => {
@@ -2928,6 +2961,7 @@ const WARNA_AKSEN = [['#F2B705','Kuning (asal)'],['#E31E24','Merah JPP'],['#FF70
 const LATAR = [['asal','Asal'],['lembut','Lembut'],['sederhana','Sederhana'],['putih','Putih']];
 const MOD = [['auto','Ikut peranti'],['cerah','Cerah'],['gelap','Gelap']];
 
+function hariBukaC(v){ const m = String(v == null || String(v).trim() === '' ? '1234567' : v).match(/[1-7]/g) || []; return m.map(Number).filter((x, i, a) => a.indexOf(x) === i).sort(); }
 function pecahSesi(s){
   return String(s || '').split(',').map(x => x.trim().match(/^(\d{1,2})[:.](\d{2})\s*-\s*(\d{1,2})[:.](\d{2})$/)).filter(Boolean)
     .map(m => ({ mula: pad(m[1]) + ':' + m[2], tamat: pad(m[3]) + ':' + m[4] }));
@@ -3000,6 +3034,8 @@ function stafTetapan(){
       '<div class="sesi"><input type="time" id="ts' + i + 'm" aria-label="Mula sesi ' + (i + 1) + '" data-tsesi="' + i + '|mula" value="' + x.mula + '"><span>hingga</span><input type="time" id="ts' + i + 't" aria-label="Tamat sesi ' + (i + 1) + '" data-tsesi="' + i + '|tamat" value="' + x.tamat + '"><button type="button" class="btn danger" data-tt="buang-sesi" data-i="' + i + '" aria-label="Buang sesi">×</button></div>').join('')
       : '<span class="hint">Tiada had waktu: pelajar boleh merekod pada bila-bila masa.</span>') +
     '<div><button type="button" class="btn" data-tt="tambah-sesi">+ Tambah sesi</button></div></div>' +
+    '<div class="field"><span class="tlbl">Hari kiosk dibuka</span><div class="chips">' + ['Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu','Ahad'].map((h, ix) => '<label class="mini"><input type="checkbox" data-thari="' + (ix + 1) + '"' + (hariBukaC(n.HARI_OPERASI).indexOf(ix + 1) >= 0 ? ' checked' : '') + '> ' + h + '</label>').join('') + '</div>' +
+    '<span class="hint">Pada hari yang tidak ditanda, kiosk ditutup: pelajar tidak boleh merekod ambilan dan peringatan suhu tidak dipaparkan.</span></div>' +
     '<div class="field"><label for="tvDomain">Hadkan e-mel pelajar kepada domain</label><input id="tvDomain" data-tv="DOMAIN_EMEL" value="' + esc(n.DOMAIN_EMEL) + '" placeholder="Kosongkan untuk benarkan semua, cth: pkk.edu.my"></div>' +
     '<div class="err" id="errAturan"></div><div class="tfoot"><span></span><button type="button" class="btn primary" data-tt="simpan-aturan">Simpan tetapan ambilan</button></div></div></section>';
 
@@ -3069,6 +3105,7 @@ function kemasTed(el){
   if (d.th) { set(T.had, d.th, el.type === 'checkbox' ? el.checked : el.value); return true; }
   if (d.ts) { set(T.staf, d.ts, el.value); return true; }
   if (d.tsesi) { set(T.sesi, d.tsesi, el.value); return true; }
+  if (d.thari) { const h = hariBukaC(T.nilai.HARI_OPERASI), x = Number(d.thari); const b = el.checked ? h.concat(h.indexOf(x) < 0 ? [x] : []) : h.filter(y => y !== x); T.nilai.HARI_OPERASI = b.sort().join(','); return true; }
   if (d.tik) { set(T.iklan, d.tik, el.type === 'checkbox' ? el.checked : el.value); if (el.type === 'checkbox') el.closest('.ikrow').classList.toggle('mati', !el.checked); return true; }
   if (d.tikv) { if (T.ikVideo) T.ikVideo[d.tikv] = el.value; return true; }
   if (d.tiks) { T.ikSaat = el.value; return true; }
@@ -3141,9 +3178,10 @@ async function aksiTed(b){
   }
   if (tt === 'simpan-aturan') {
     const n = T.nilai;
+    if (!hariBukaC(n.HARI_OPERASI).length || !String(n.HARI_OPERASI || '').trim()) { $('#errAturan').textContent = 'Pilih sekurang-kurangnya satu hari kiosk dibuka.'; return; }
     for (const x of T.sesi) if (!x.mula || !x.tamat || x.mula >= x.tamat) { $('#errAturan').textContent = 'Setiap sesi waktu operasi perlu masa mula dan tamat, dan masa tamat mesti selepas masa mula.'; return; }
     const d = await simpanTed(b, 'errAturan', 'simpanTetapan', [{ TERIMA_AMBILAN: n.TERIMA_AMBILAN, MESEJ_TUTUP: n.MESEJ_TUTUP, HAD_ITEM_SEKALI: n.HAD_ITEM_SEKALI,
-      SELANG_HARI: n.SELANG_HARI, HAD_SEMINGGU: n.HAD_SEMINGGU, DOMAIN_EMEL: n.DOMAIN_EMEL, WAKTU_OPERASI: T.sesi.map(x => x.mula + '-' + x.tamat).join(', ') }]);
+      SELANG_HARI: n.SELANG_HARI, HAD_SEMINGGU: n.HAD_SEMINGGU, DOMAIN_EMEL: n.DOMAIN_EMEL, WAKTU_OPERASI: T.sesi.map(x => x.mula + '-' + x.tamat).join(', '), HARI_OPERASI: n.HARI_OPERASI }]);
     if (d) { render(); toast('Tetapan ambilan disimpan'); }
     return;
   }
